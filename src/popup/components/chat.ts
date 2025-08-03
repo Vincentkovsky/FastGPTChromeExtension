@@ -119,10 +119,7 @@ export class ChatComponent {
           </div>
         </div>
         
-        <div class="loading-overlay" id="loading-overlay" style="display: none;">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Sending message...</div>
-        </div>
+
       </div>
     `;
   }
@@ -231,17 +228,11 @@ export class ChatComponent {
     input.value = '';
     input.style.height = 'auto';
 
-    // Update UI state
-    this.setLoadingState(true);
-
     try {
       // Add user message to chat
       const userMessage = this.createMessage('user', message);
       await this.addMessageToSession(userMessage);
       this.renderMessages();
-
-      // Show typing indicator
-      this.showTypingIndicator(true);
 
       // Create assistant message for streaming
       const assistantMessage = this.createMessage('assistant', '');
@@ -250,19 +241,18 @@ export class ChatComponent {
       // Render messages to show the empty assistant message
       this.renderMessages();
       
-      // Hide typing indicator and start streaming
-      this.showTypingIndicator(false);
+      // Start streaming immediately
       this.setStreamingState(true);
 
       // Stream message from FastGPT
+      console.log('Starting stream for message:', message);
+      console.log('Assistant message ID:', assistantMessage.id);
       await this.streamMessageResponse(assistantMessage, message);
 
     } catch (error) {
       console.error('Error sending message:', error);
-      this.showTypingIndicator(false);
       await this.showErrorMessage('Failed to send message. Please try again.');
     } finally {
-      this.setLoadingState(false);
       this.updateSendButtonState(input, document.querySelector('#send-button') as HTMLButtonElement);
     }
   }
@@ -408,27 +398,7 @@ export class ChatComponent {
     });
   }
 
-  /**
-   * Set loading state for the interface
-   */
-  private setLoadingState(loading: boolean): void {
-    this.isLoading = loading;
-    const loadingOverlay = document.querySelector('#loading-overlay') as HTMLElement;
-    const messageInput = document.querySelector('#message-input') as HTMLTextAreaElement;
-    const sendButton = document.querySelector('#send-button') as HTMLButtonElement;
 
-    if (loadingOverlay) {
-      loadingOverlay.style.display = loading ? 'flex' : 'none';
-    }
-
-    if (messageInput) {
-      messageInput.disabled = loading;
-    }
-
-    if (sendButton) {
-      this.updateSendButtonState(messageInput, sendButton);
-    }
-  }
 
   /**
    * Set streaming state for the interface
@@ -446,11 +416,7 @@ export class ChatComponent {
       this.updateSendButtonState(messageInput, sendButton);
     }
 
-    // Update loading overlay text for streaming
-    const loadingText = document.querySelector('.loading-text') as HTMLElement;
-    if (loadingText) {
-      loadingText.textContent = streaming ? 'Receiving response...' : 'Sending message...';
-    }
+
   }
 
   /**
@@ -467,7 +433,13 @@ export class ChatComponent {
    * Stream message response from FastGPT and update UI in real-time
    */
   private async streamMessageResponse(assistantMessage: ChatMessage, userMessage: string): Promise<void> {
+    console.log('streamMessageResponse called with:', { assistantMessage, userMessage });
+    
     if (!this.fastgptClient || !this.currentSession) {
+      console.error('Missing dependencies:', { 
+        fastgptClient: !!this.fastgptClient, 
+        currentSession: !!this.currentSession 
+      });
       throw new Error('FastGPT client or current session not available');
     }
 
@@ -476,10 +448,18 @@ export class ChatComponent {
     try {
       // Get the message element for real-time updates
       const messageElement = document.querySelector(`[data-message-id="${assistantMessage.id}"]`);
+      console.log('Found message element:', !!messageElement);
+      
       const messageContentElement = messageElement?.querySelector('.message-content') as HTMLElement;
       const messageTextElement = messageElement?.querySelector('.message-text') as HTMLElement;
       
+      console.log('Found sub-elements:', { 
+        messageContentElement: !!messageContentElement, 
+        messageTextElement: !!messageTextElement 
+      });
+      
       if (!messageTextElement || !messageContentElement) {
+        console.error('Message elements not found for ID:', assistantMessage.id);
         throw new Error('Message element not found for streaming updates');
       }
 
@@ -514,6 +494,22 @@ export class ChatComponent {
           await this.sleep(20);
         }
       }
+
+      // Remove streaming visual indicators
+      messageElement?.classList.remove('streaming');
+      messageContentElement.classList.remove('streaming');
+
+      // Final update to ensure message is complete
+      assistantMessage.content = accumulatedContent;
+      assistantMessage.timestamp = new Date();
+      
+      // Final render to ensure proper formatting
+      messageTextElement.innerHTML = this.formatMessageContent(accumulatedContent);
+      
+      // Save the completed message to storage
+      await this.saveChatSession();
+      
+      console.log(`Streaming completed successfully with ${chunkCount} chunks`);
 
       // Remove streaming visual indicators
       messageElement?.classList.remove('streaming');

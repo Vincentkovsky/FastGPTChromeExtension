@@ -1,4 +1,4 @@
-import { FastGPTConfig, ChatMessage } from '../types/storage';
+import { FastGPTConfig, ChatMessage } from "../types/storage";
 
 export interface ConnectionTestResult {
   success: boolean;
@@ -9,14 +9,14 @@ export interface ConnectionTestResult {
 export interface FastGPTApiError {
   code?: number;
   message: string;
-  type: 'network' | 'authentication' | 'validation' | 'server' | 'unknown';
+  type: "network" | "authentication" | "validation" | "server" | "unknown";
   retryable?: boolean;
   retryAfter?: number; // seconds to wait before retry
 }
 
 // OpenAI-compatible request/response types for FastGPT
 export interface ChatCompletionMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
@@ -31,7 +31,7 @@ export interface ChatCompletionRequest {
 
 export interface ChatCompletionChoice {
   message: {
-    role: 'assistant';
+    role: "assistant";
     content: string;
   };
   finish_reason: string;
@@ -51,7 +51,7 @@ export interface ChatCompletionResponse {
 
 export interface ChatCompletionStreamChoice {
   delta: {
-    role?: 'assistant';
+    role?: "assistant";
     content?: string;
   };
   finish_reason: string | null;
@@ -67,13 +67,13 @@ export interface ChatCompletionStreamResponse {
 }
 
 export interface StreamingError {
-  type: 'connection' | 'parsing' | 'timeout' | 'abort';
+  type: "connection" | "parsing" | "timeout" | "abort";
   message: string;
   recoverable: boolean;
 }
 
 export interface StreamingEvent {
-  type: 'start' | 'chunk' | 'error' | 'complete' | 'abort';
+  type: "start" | "chunk" | "error" | "complete" | "abort";
   data?: string;
   error?: StreamingError;
   metadata?: {
@@ -96,7 +96,7 @@ export class FastGPTClient {
     maxRetries: 3,
     baseDelay: 1000, // 1 second
     maxDelay: 10000, // 10 seconds
-    backoffMultiplier: 2
+    backoffMultiplier: 2,
   };
 
   constructor(config: FastGPTConfig) {
@@ -114,30 +114,30 @@ export class FastGPTClient {
         return {
           success: false,
           error: validationError.message,
-          details: 'Configuration validation failed'
+          details: "Configuration validation failed",
         };
       }
 
       // Make a simple test request to the chat completions endpoint
       const response = await this.makeTestRequest();
-      
+
       if (response.success) {
         return {
           success: true,
-          details: 'Connection test successful'
+          details: "Connection test successful",
         };
       } else {
         return {
           success: false,
-          error: response.error?.message || 'Connection test failed',
-          details: response.error?.type || 'Unknown error'
+          error: response.error?.message || "Connection test failed",
+          details: response.error?.type || "Unknown error",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: 'Unexpected error during connection test',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: "Unexpected error during connection test",
+        details: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -148,38 +148,38 @@ export class FastGPTClient {
   private validateConfig(): FastGPTApiError | null {
     if (!this.config.baseUrl) {
       return {
-        message: 'Base URL is required',
-        type: 'validation'
+        message: "Base URL is required",
+        type: "validation",
       };
     }
 
     if (!this.config.appId) {
       return {
-        message: 'App ID is required',
-        type: 'validation'
+        message: "App ID is required",
+        type: "validation",
       };
     }
 
     if (!this.config.apiKey) {
       return {
-        message: 'API Key is required',
-        type: 'validation'
+        message: "API Key is required",
+        type: "validation",
       };
     }
 
     // Validate URL format
     try {
       const url = new URL(this.config.baseUrl);
-      if (!['http:', 'https:'].includes(url.protocol)) {
+      if (!["http:", "https:"].includes(url.protocol)) {
         return {
-          message: 'Base URL must use HTTP or HTTPS protocol',
-          type: 'validation'
+          message: "Base URL must use HTTP or HTTPS protocol",
+          type: "validation",
         };
       }
     } catch {
       return {
-        message: 'Invalid Base URL format',
-        type: 'validation'
+        message: "Invalid Base URL format",
+        type: "validation",
       };
     }
 
@@ -189,12 +189,15 @@ export class FastGPTClient {
   /**
    * Make a test request to FastGPT API
    */
-  private async makeTestRequest(): Promise<{ success: boolean; error?: FastGPTApiError }> {
+  private async makeTestRequest(): Promise<{
+    success: boolean;
+    error?: FastGPTApiError;
+  }> {
     try {
       return await this.executeWithRetry(async () => {
         // Construct the API endpoint URL
-        const apiUrl = this.buildApiUrl('/v1/chat/completions');
-        
+        const apiUrl = this.buildApiUrl("/v1/chat/completions");
+
         // Prepare test request payload
         const requestBody = {
           chatId: `test_${Date.now()}`,
@@ -202,20 +205,20 @@ export class FastGPTClient {
           detail: false,
           messages: [
             {
-              role: 'user',
-              content: 'test connection'
-            }
-          ]
+              role: "user",
+              content: "test connection",
+            },
+          ],
         };
 
         // Make the request
         const response = await fetch(apiUrl, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${this.config.apiKey}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${this.config.apiKey}`,
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
         });
 
         // Handle different response statuses
@@ -225,38 +228,39 @@ export class FastGPTClient {
         } else {
           // Parse error response
           const errorData = await this.parseErrorResponse(response);
-          
+
           // Throw error to trigger retry logic if retryable
           if (errorData.retryable) {
             throw new Error(errorData.message);
           }
-          
+
           return {
             success: false,
-            error: errorData
+            error: errorData,
           };
         }
       });
     } catch (error) {
       // Handle network errors and other exceptions
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+      if (error instanceof TypeError && error.message.includes("fetch")) {
         return {
           success: false,
           error: {
-            message: 'Network error: Unable to connect to FastGPT server',
-            type: 'network',
-            retryable: true
-          }
+            message: "Network error: Unable to connect to FastGPT server",
+            type: "network",
+            retryable: true,
+          },
         };
       }
 
       return {
         success: false,
         error: {
-          message: error instanceof Error ? error.message : 'Unknown network error',
-          type: 'network',
-          retryable: true
-        }
+          message:
+            error instanceof Error ? error.message : "Unknown network error",
+          type: "network",
+          retryable: true,
+        },
       };
     }
   }
@@ -265,88 +269,92 @@ export class FastGPTClient {
    * Build API URL from base URL and endpoint
    */
   private buildApiUrl(endpoint: string): string {
-    const baseUrl = this.config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
-    const apiPath = baseUrl.includes('/api') ? '' : '/api';
+    const baseUrl = this.config.baseUrl.replace(/\/$/, ""); // Remove trailing slash
+    const apiPath = baseUrl.includes("/api") ? "" : "/api";
     return `${baseUrl}${apiPath}${endpoint}`;
   }
 
   /**
    * Parse error response from FastGPT API
    */
-  private async parseErrorResponse(response: Response): Promise<FastGPTApiError> {
+  private async parseErrorResponse(
+    response: Response
+  ): Promise<FastGPTApiError> {
     try {
       const errorData = await response.json();
-      const retryAfter = response.headers.get('Retry-After');
-      
+      const retryAfter = response.headers.get("Retry-After");
+
       // Handle different HTTP status codes
       switch (response.status) {
         case 401:
           return {
             code: 401,
-            message: 'Authentication failed: Invalid API key',
-            type: 'authentication',
-            retryable: false
+            message: "Authentication failed: Invalid API key",
+            type: "authentication",
+            retryable: false,
           };
-        
+
         case 403:
           return {
             code: 403,
-            message: 'Access forbidden: Check your API key permissions',
-            type: 'authentication',
-            retryable: false
+            message: "Access forbidden: Check your API key permissions",
+            type: "authentication",
+            retryable: false,
           };
-        
+
         case 404:
           return {
             code: 404,
-            message: 'API endpoint not found: Check your Base URL',
-            type: 'validation',
-            retryable: false
+            message: "API endpoint not found: Check your Base URL",
+            type: "validation",
+            retryable: false,
           };
-        
+
         case 400:
           return {
             code: 400,
-            message: errorData.message || 'Bad request: Invalid configuration',
-            type: 'validation',
-            retryable: false
+            message: errorData.message || "Bad request: Invalid configuration",
+            type: "validation",
+            retryable: false,
           };
-        
+
         case 429:
           return {
             code: 429,
-            message: 'Rate limit exceeded: Too many requests',
-            type: 'server',
+            message: "Rate limit exceeded: Too many requests",
+            type: "server",
             retryable: true,
-            retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined
+            retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined,
           };
-        
+
         case 500:
         case 502:
         case 503:
         case 504:
           return {
             code: response.status,
-            message: 'Server error: FastGPT service is temporarily unavailable',
-            type: 'server',
+            message: "Server error: FastGPT service is temporarily unavailable",
+            type: "server",
             retryable: true,
-            retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined
+            retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined,
           };
-        
+
         case 408: // Request Timeout
           return {
             code: 408,
-            message: 'Request timeout: The server took too long to respond',
-            type: 'server',
-            retryable: true
+            message: "Request timeout: The server took too long to respond",
+            type: "server",
+            retryable: true,
           };
-        
+
         default:
           return {
             code: response.status,
-            message: errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-            type: 'unknown',
-            retryable: response.status >= 500 // Retry server errors by default
+            message:
+              errorData.message ||
+              `HTTP ${response.status}: ${response.statusText}`,
+            type: "unknown",
+            retryable: response.status >= 500, // Retry server errors by default
           };
       }
     } catch {
@@ -354,8 +362,8 @@ export class FastGPTClient {
       return {
         code: response.status,
         message: `HTTP ${response.status}: ${response.statusText}`,
-        type: 'unknown',
-        retryable: response.status >= 500
+        type: "unknown",
+        retryable: response.status >= 500,
       };
     }
   }
@@ -369,31 +377,31 @@ export class FastGPTClient {
   ): Promise<T> {
     const options = { ...this.defaultRetryOptions, ...retryOptions };
     let lastError: Error;
-    
+
     for (let attempt = 0; attempt <= options.maxRetries; attempt++) {
       try {
         return await operation();
       } catch (error) {
         lastError = error as Error;
-        
+
         // Don't retry on the last attempt
         if (attempt === options.maxRetries) {
           break;
         }
-        
+
         // Check if error is retryable
         if (!this.isRetryableError(error)) {
           throw error;
         }
-        
+
         // Calculate delay with exponential backoff
         const delay = this.calculateRetryDelay(attempt, options, error);
-        
+
         // Wait before retrying
         await this.sleep(delay);
       }
     }
-    
+
     throw lastError!;
   }
 
@@ -402,27 +410,30 @@ export class FastGPTClient {
    */
   private isRetryableError(error: unknown): boolean {
     // Network errors are always retryable
-    if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
       return true;
     }
-    
+
     // Check if it's a FastGPT API error with retryable flag
-    if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
+    if (
+      error instanceof Error &&
+      error.message.includes("Rate limit exceeded")
+    ) {
       return true;
     }
-    
-    if (error instanceof Error && error.message.includes('Server error')) {
+
+    if (error instanceof Error && error.message.includes("Server error")) {
       return true;
     }
-    
-    if (error instanceof Error && error.message.includes('Request timeout')) {
+
+    if (error instanceof Error && error.message.includes("Request timeout")) {
       return true;
     }
-    
-    if (error instanceof Error && error.message.includes('Network error')) {
+
+    if (error instanceof Error && error.message.includes("Network error")) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -435,7 +446,10 @@ export class FastGPTClient {
     error: unknown
   ): number {
     // Check if server provided a Retry-After header value
-    if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
+    if (
+      error instanceof Error &&
+      error.message.includes("Rate limit exceeded")
+    ) {
       // For rate limiting, use a longer base delay
       const rateLimitDelay = Math.min(
         options.baseDelay * Math.pow(options.backoffMultiplier, attempt + 1),
@@ -443,13 +457,13 @@ export class FastGPTClient {
       );
       return rateLimitDelay;
     }
-    
+
     // Standard exponential backoff
     const delay = Math.min(
       options.baseDelay * Math.pow(options.backoffMultiplier, attempt),
       options.maxDelay
     );
-    
+
     // Add jitter to prevent thundering herd
     const jitter = Math.random() * 0.1 * delay;
     return delay + jitter;
@@ -459,7 +473,7 @@ export class FastGPTClient {
    * Sleep for specified milliseconds
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -502,69 +516,75 @@ export class FastGPTClient {
     const validationError = this.validateConfig();
     if (validationError) {
       yield {
-        type: 'error',
+        type: "error",
         error: {
-          type: 'connection',
+          type: "connection",
           message: validationError.message,
-          recoverable: false
-        }
+          recoverable: false,
+        },
       };
       return;
     }
 
-    const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const messageId = `msg_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
     let chunkCount = 0;
 
     try {
       // Emit start event
       yield {
-        type: 'start',
+        type: "start",
         metadata: {
           messageId,
           totalChunks: 0,
-          currentChunk: 0
-        }
+          currentChunk: 0,
+        },
       };
 
       // Create streaming generator with enhanced error handling
       const streamGenerator = await this.executeWithRetry(async () => {
-        return this.createEnhancedStreamGenerator(message, chatId, variables, options);
+        return this.createEnhancedStreamGenerator(
+          message,
+          chatId,
+          variables,
+          options
+        );
       });
 
       // Process stream with event emission
       for await (const chunk of streamGenerator) {
         chunkCount++;
         yield {
-          type: 'chunk',
+          type: "chunk",
           data: chunk,
           metadata: {
             messageId,
-            currentChunk: chunkCount
-          }
+            currentChunk: chunkCount,
+          },
         };
       }
 
       // Emit completion event
       yield {
-        type: 'complete',
+        type: "complete",
         metadata: {
           messageId,
           totalChunks: chunkCount,
-          currentChunk: chunkCount
-        }
+          currentChunk: chunkCount,
+        },
       };
-
     } catch (error) {
       // Determine error type and recoverability
       const streamingError = this.classifyStreamingError(error);
-      
+
       yield {
-        type: 'error',
+        type: "error",
         error: streamingError,
         metadata: {
           messageId,
-          currentChunk: chunkCount
-        }
+          currentChunk: chunkCount,
+        },
       };
     }
   }
@@ -581,43 +601,45 @@ export class FastGPTClient {
       abortSignal?: AbortSignal;
     }
   ): Promise<AsyncGenerator<string, void, unknown>> {
-    const apiUrl = this.buildApiUrl('/v1/chat/completions');
-    
+    const apiUrl = this.buildApiUrl("/v1/chat/completions");
+
     const requestBody: ChatCompletionRequest = {
       chatId,
       stream: true,
       detail: false,
       messages: [
         {
-          role: 'user',
-          content: message
-        }
+          role: "user",
+          content: message,
+        },
       ],
-      variables
+      variables,
     };
 
     // Create AbortController for timeout and cancellation
     const controller = new AbortController();
-    const timeoutId = options?.timeout ? setTimeout(() => {
-      controller.abort();
-    }, options.timeout) : null;
+    const timeoutId = options?.timeout
+      ? setTimeout(() => {
+          controller.abort();
+        }, options.timeout)
+      : null;
 
     // Listen for external abort signal
     if (options?.abortSignal) {
-      options.abortSignal.addEventListener('abort', () => {
+      options.abortSignal.addEventListener("abort", () => {
         controller.abort();
       });
     }
 
     try {
       const response = await fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.config.apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       if (timeoutId) {
@@ -626,31 +648,34 @@ export class FastGPTClient {
 
       if (!response.ok) {
         const error = await this.parseErrorResponse(response);
-        
+
         // Throw error to trigger retry logic if retryable
         if (error.retryable) {
           throw new Error(error.message);
         }
-        
+
         // For non-retryable errors, throw immediately
         throw new Error(error.message);
       }
 
       if (!response.body) {
-        throw new Error('No response body received');
+        throw new Error("No response body received");
       }
 
-      return this.processEnhancedStreamResponse(response.body, controller.signal);
+      return this.processEnhancedStreamResponse(
+        response.body,
+        controller.signal
+      );
     } catch (error) {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       // Handle abort errors
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request was aborted');
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Request was aborted");
       }
-      
+
       throw error;
     }
   }
@@ -663,44 +688,44 @@ export class FastGPTClient {
     chatId?: string,
     variables?: Record<string, any>
   ): Promise<AsyncGenerator<string, void, unknown>> {
-    const apiUrl = this.buildApiUrl('/v1/chat/completions');
-    
+    const apiUrl = this.buildApiUrl("/v1/chat/completions");
+
     const requestBody: ChatCompletionRequest = {
       chatId,
       stream: true,
       detail: false,
       messages: [
         {
-          role: 'user',
-          content: message
-        }
+          role: "user",
+          content: message,
+        },
       ],
-      variables
+      variables,
     };
 
     const response = await fetch(apiUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.config.apiKey}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
       const error = await this.parseErrorResponse(response);
-      
+
       // Throw error to trigger retry logic if retryable
       if (error.retryable) {
         throw new Error(error.message);
       }
-      
+
       // For non-retryable errors, throw immediately
       throw new Error(error.message);
     }
 
     if (!response.body) {
-      throw new Error('No response body received');
+      throw new Error("No response body received");
     }
 
     return this.processStreamResponse(response.body);
@@ -715,17 +740,17 @@ export class FastGPTClient {
   ): AsyncGenerator<string, void, unknown> {
     const reader = body.getReader();
     const decoder = new TextDecoder();
-    let buffer = '';
+    let buffer = "";
 
     try {
       while (true) {
         // Check for abort signal
         if (abortSignal?.aborted) {
-          throw new Error('Stream was aborted');
+          throw new Error("Stream was aborted");
         }
 
         const { done, value } = await reader.read();
-        
+
         if (done) {
           break;
         }
@@ -735,28 +760,32 @@ export class FastGPTClient {
         buffer += chunk;
 
         // Process complete lines from buffer
-        const lines = buffer.split('\n');
+        const lines = buffer.split("\n");
         // Keep the last incomplete line in buffer
-        buffer = lines.pop() || '';
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
           const trimmedLine = line.trim();
-          
-          if (trimmedLine === '' || trimmedLine === 'data: [DONE]') {
+
+          if (trimmedLine === "" || trimmedLine === "data: [DONE]") {
             continue;
           }
 
-          if (trimmedLine.startsWith('data: ')) {
+          if (trimmedLine.startsWith("data: ")) {
             try {
               const jsonStr = trimmedLine.slice(6); // Remove 'data: ' prefix
               const data: ChatCompletionStreamResponse = JSON.parse(jsonStr);
-              
-              if (data.choices && data.choices[0] && data.choices[0].delta.content) {
+
+              if (
+                data.choices &&
+                data.choices[0] &&
+                data.choices[0].delta.content
+              ) {
                 yield data.choices[0].delta.content;
               }
             } catch (parseError) {
               // Log parsing errors but continue processing
-              console.warn('Failed to parse streaming chunk:', parseError);
+              console.warn("Failed to parse streaming chunk:", parseError);
               continue;
             }
           }
@@ -766,29 +795,36 @@ export class FastGPTClient {
       // Process any remaining data in buffer
       if (buffer.trim()) {
         const trimmedLine = buffer.trim();
-        if (trimmedLine.startsWith('data: ') && trimmedLine !== 'data: [DONE]') {
+        if (
+          trimmedLine.startsWith("data: ") &&
+          trimmedLine !== "data: [DONE]"
+        ) {
           try {
             const jsonStr = trimmedLine.slice(6);
             const data: ChatCompletionStreamResponse = JSON.parse(jsonStr);
-            
-            if (data.choices && data.choices[0] && data.choices[0].delta.content) {
+
+            if (
+              data.choices &&
+              data.choices[0] &&
+              data.choices[0].delta.content
+            ) {
               yield data.choices[0].delta.content;
             }
           } catch (parseError) {
-            console.warn('Failed to parse final streaming chunk:', parseError);
+            console.warn("Failed to parse final streaming chunk:", parseError);
           }
         }
       }
     } catch (error) {
       // Handle stream reading errors
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Stream was aborted');
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Stream was aborted");
       }
-      
-      if (error instanceof Error && error.message.includes('network')) {
-        throw new Error('Network connection lost during streaming');
+
+      if (error instanceof Error && error.message.includes("network")) {
+        throw new Error("Network connection lost during streaming");
       }
-      
+
       throw error;
     } finally {
       reader.releaseLock();
@@ -798,37 +834,89 @@ export class FastGPTClient {
   /**
    * Process streaming response body
    */
-  private async *processStreamResponse(body: ReadableStream<Uint8Array>): AsyncGenerator<string, void, unknown> {
+  private async *processStreamResponse(
+    body: ReadableStream<Uint8Array>
+  ): AsyncGenerator<string, void, unknown> {
     const reader = body.getReader();
     const decoder = new TextDecoder();
 
     try {
+      console.log("Starting to process stream response");
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) {
+          console.log("Stream reading completed");
           break;
         }
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+        console.log("Received chunk:", chunk);
+        const lines = chunk.split("\n");
 
         for (const line of lines) {
           const trimmedLine = line.trim();
-          
-          if (trimmedLine === '' || trimmedLine === 'data: [DONE]') {
+          console.log("Processing line:", trimmedLine);
+
+          if (trimmedLine === "" || trimmedLine === "data: [DONE]") {
             continue;
           }
 
-          if (trimmedLine.startsWith('data: ')) {
+          if (trimmedLine.startsWith("data: ")) {
             try {
               const jsonStr = trimmedLine.slice(6); // Remove 'data: ' prefix
-              const data: ChatCompletionStreamResponse = JSON.parse(jsonStr);
-              
-              if (data.choices && data.choices[0] && data.choices[0].delta.content) {
+              console.log("Parsing JSON:", jsonStr);
+              const data = JSON.parse(jsonStr);
+              console.log("Parsed data:", data);
+
+              // Check if this is an error response
+              if (data.code && data.statusText && data.message) {
+                // This is an error response from FastGPT - show detailed error info
+                let errorMessage = `❌ FastGPT API 错误\n\n`;
+                errorMessage += `• 错误代码: ${data.code}\n`;
+                errorMessage += `• 状态: ${data.statusText}\n`;
+                errorMessage += `• 消息: ${data.message}`;
+
+                if (data.data) {
+                  errorMessage += `\n• 详细信息: ${JSON.stringify(data.data)}`;
+                }
+
+                // Add user-friendly translation for common errors
+                if (data.statusText === "aiPointsNotEnough") {
+                  errorMessage += `\n\n💡 这通常表示您的 FastGPT 账户余额不足，请前往 FastGPT 平台充值。`;
+                } else if (data.statusText === "authenticationFailed") {
+                  errorMessage += `\n\n💡 请检查您的 API 密钥是否正确配置。`;
+                } else if (data.statusText === "rateLimitExceeded") {
+                  errorMessage += `\n\n💡 请求过于频繁，请稍后再试。`;
+                }
+
+                throw new Error(errorMessage);
+              }
+
+              // Check if this is a normal streaming response
+              if (
+                data.choices &&
+                data.choices[0] &&
+                data.choices[0].delta &&
+                data.choices[0].delta.content
+              ) {
+                console.log("Yielding content:", data.choices[0].delta.content);
                 yield data.choices[0].delta.content;
               }
             } catch (parseError) {
+              console.error(
+                "JSON parse error:",
+                parseError,
+                "for line:",
+                trimmedLine
+              );
+              // If it's an error we threw, re-throw it
+              if (
+                parseError instanceof Error &&
+                parseError.message.startsWith("❌")
+              ) {
+                throw parseError;
+              }
               // Skip malformed JSON chunks
               continue;
             }
@@ -856,49 +944,49 @@ export class FastGPTClient {
     }
 
     return await this.executeWithRetry(async () => {
-      const apiUrl = this.buildApiUrl('/v1/chat/completions');
-      
+      const apiUrl = this.buildApiUrl("/v1/chat/completions");
+
       const requestBody: ChatCompletionRequest = {
         chatId,
         stream: false,
         detail: false,
         messages: [
           {
-            role: 'user',
-            content: message
-          }
+            role: "user",
+            content: message,
+          },
         ],
-        variables
+        variables,
       };
 
       const response = await fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.config.apiKey}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const error = await this.parseErrorResponse(response);
-        
+
         // Throw error to trigger retry logic if retryable
         if (error.retryable) {
           throw new Error(error.message);
         }
-        
+
         // For non-retryable errors, throw immediately
         throw new Error(error.message);
       }
 
       const data: ChatCompletionResponse = await response.json();
-      
+
       if (data.choices && data.choices[0] && data.choices[0].message) {
         return data.choices[0].message.content;
       }
 
-      throw new Error('Invalid response format from FastGPT API');
+      throw new Error("Invalid response format from FastGPT API");
     });
   }
 
@@ -917,12 +1005,12 @@ export class FastGPTClient {
     }
 
     return await this.executeWithRetry(async () => {
-      const apiUrl = this.buildApiUrl('/v1/chat/completions');
-      
+      const apiUrl = this.buildApiUrl("/v1/chat/completions");
+
       // Convert ChatMessage[] to ChatCompletionMessage[]
-      const apiMessages: ChatCompletionMessage[] = messages.map(msg => ({
+      const apiMessages: ChatCompletionMessage[] = messages.map((msg) => ({
         role: msg.role,
-        content: msg.content
+        content: msg.content,
       }));
 
       const requestBody: ChatCompletionRequest = {
@@ -930,37 +1018,37 @@ export class FastGPTClient {
         stream: false,
         detail: false,
         messages: apiMessages,
-        variables
+        variables,
       };
 
       const response = await fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.config.apiKey}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const error = await this.parseErrorResponse(response);
-        
+
         // Throw error to trigger retry logic if retryable
         if (error.retryable) {
           throw new Error(error.message);
         }
-        
+
         // For non-retryable errors, throw immediately
         throw new Error(error.message);
       }
 
       const data: ChatCompletionResponse = await response.json();
-      
+
       if (data.choices && data.choices[0] && data.choices[0].message) {
         return data.choices[0].message.content;
       }
 
-      throw new Error('Invalid response format from FastGPT API');
+      throw new Error("Invalid response format from FastGPT API");
     });
   }
 
@@ -994,12 +1082,12 @@ export class FastGPTClient {
     chatId?: string,
     variables?: Record<string, any>
   ): Promise<AsyncGenerator<string, void, unknown>> {
-    const apiUrl = this.buildApiUrl('/v1/chat/completions');
-    
+    const apiUrl = this.buildApiUrl("/v1/chat/completions");
+
     // Convert ChatMessage[] to ChatCompletionMessage[]
-    const apiMessages: ChatCompletionMessage[] = messages.map(msg => ({
+    const apiMessages: ChatCompletionMessage[] = messages.map((msg) => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
     }));
 
     const requestBody: ChatCompletionRequest = {
@@ -1007,32 +1095,32 @@ export class FastGPTClient {
       stream: true,
       detail: false,
       messages: apiMessages,
-      variables
+      variables,
     };
 
     const response = await fetch(apiUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.config.apiKey}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
       const error = await this.parseErrorResponse(response);
-      
+
       // Throw error to trigger retry logic if retryable
       if (error.retryable) {
         throw new Error(error.message);
       }
-      
+
       // For non-retryable errors, throw immediately
       throw new Error(error.message);
     }
 
     if (!response.body) {
-      throw new Error('No response body received');
+      throw new Error("No response body received");
     }
 
     return this.processStreamResponse(response.body);
@@ -1044,76 +1132,83 @@ export class FastGPTClient {
   private classifyStreamingError(error: unknown): StreamingError {
     if (error instanceof Error) {
       // Handle abort errors
-      if (error.name === 'AbortError' || error.message.includes('aborted')) {
+      if (error.name === "AbortError" || error.message.includes("aborted")) {
         return {
-          type: 'abort',
-          message: 'Request was cancelled or timed out',
-          recoverable: true
+          type: "abort",
+          message: "Request was cancelled or timed out",
+          recoverable: true,
         };
       }
 
       // Handle timeout errors
-      if (error.message.includes('timeout')) {
+      if (error.message.includes("timeout")) {
         return {
-          type: 'timeout',
-          message: 'Request timed out while streaming',
-          recoverable: true
+          type: "timeout",
+          message: "Request timed out while streaming",
+          recoverable: true,
         };
       }
 
       // Handle network connection errors
-      if (error.message.includes('network') || error.message.includes('fetch') || 
-          error.message.includes('connection lost')) {
+      if (
+        error.message.includes("network") ||
+        error.message.includes("fetch") ||
+        error.message.includes("connection lost")
+      ) {
         return {
-          type: 'connection',
-          message: 'Network connection lost during streaming',
-          recoverable: true
+          type: "connection",
+          message: "Network connection lost during streaming",
+          recoverable: true,
         };
       }
 
       // Handle parsing errors
-      if (error.message.includes('parse') || error.message.includes('JSON')) {
+      if (error.message.includes("parse") || error.message.includes("JSON")) {
         return {
-          type: 'parsing',
-          message: 'Failed to parse streaming response',
-          recoverable: false
+          type: "parsing",
+          message: "Failed to parse streaming response",
+          recoverable: false,
         };
       }
 
       // Handle authentication and validation errors (non-recoverable)
-      if (error.message.includes('Authentication failed') || 
-          error.message.includes('Invalid API key') ||
-          error.message.includes('Access forbidden')) {
+      if (
+        error.message.includes("Authentication failed") ||
+        error.message.includes("Invalid API key") ||
+        error.message.includes("Access forbidden")
+      ) {
         return {
-          type: 'connection',
+          type: "connection",
           message: error.message,
-          recoverable: false
+          recoverable: false,
         };
       }
 
       // Handle server errors (potentially recoverable)
-      if (error.message.includes('Server error') || 
-          error.message.includes('service unavailable')) {
+      if (
+        error.message.includes("Server error") ||
+        error.message.includes("service unavailable")
+      ) {
         return {
-          type: 'connection',
+          type: "connection",
           message: error.message,
-          recoverable: true
+          recoverable: true,
         };
       }
 
       // Generic error handling
       return {
-        type: 'connection',
+        type: "connection",
         message: error.message,
-        recoverable: true
+        recoverable: true,
       };
     }
 
     // Unknown error type
     return {
-      type: 'connection',
-      message: 'An unknown error occurred during streaming',
-      recoverable: false
+      type: "connection",
+      message: "An unknown error occurred during streaming",
+      recoverable: false,
     };
   }
 
@@ -1133,69 +1228,75 @@ export class FastGPTClient {
     const validationError = this.validateConfig();
     if (validationError) {
       yield {
-        type: 'error',
+        type: "error",
         error: {
-          type: 'connection',
+          type: "connection",
           message: validationError.message,
-          recoverable: false
-        }
+          recoverable: false,
+        },
       };
       return;
     }
 
-    const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const messageId = `msg_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
     let chunkCount = 0;
 
     try {
       // Emit start event
       yield {
-        type: 'start',
+        type: "start",
         metadata: {
           messageId,
           totalChunks: 0,
-          currentChunk: 0
-        }
+          currentChunk: 0,
+        },
       };
 
       // Create streaming generator with enhanced error handling
       const streamGenerator = await this.executeWithRetry(async () => {
-        return this.createEnhancedStreamGeneratorWithHistory(messages, chatId, variables, options);
+        return this.createEnhancedStreamGeneratorWithHistory(
+          messages,
+          chatId,
+          variables,
+          options
+        );
       });
 
       // Process stream with event emission
       for await (const chunk of streamGenerator) {
         chunkCount++;
         yield {
-          type: 'chunk',
+          type: "chunk",
           data: chunk,
           metadata: {
             messageId,
-            currentChunk: chunkCount
-          }
+            currentChunk: chunkCount,
+          },
         };
       }
 
       // Emit completion event
       yield {
-        type: 'complete',
+        type: "complete",
         metadata: {
           messageId,
           totalChunks: chunkCount,
-          currentChunk: chunkCount
-        }
+          currentChunk: chunkCount,
+        },
       };
-
     } catch (error) {
       // Determine error type and recoverability
       const streamingError = this.classifyStreamingError(error);
-      
+
       yield {
-        type: 'error',
+        type: "error",
         error: streamingError,
         metadata: {
           messageId,
-          currentChunk: chunkCount
-        }
+          currentChunk: chunkCount,
+        },
       };
     }
   }
@@ -1212,12 +1313,12 @@ export class FastGPTClient {
       abortSignal?: AbortSignal;
     }
   ): Promise<AsyncGenerator<string, void, unknown>> {
-    const apiUrl = this.buildApiUrl('/v1/chat/completions');
-    
+    const apiUrl = this.buildApiUrl("/v1/chat/completions");
+
     // Convert ChatMessage[] to ChatCompletionMessage[]
-    const apiMessages: ChatCompletionMessage[] = messages.map(msg => ({
+    const apiMessages: ChatCompletionMessage[] = messages.map((msg) => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
     }));
 
     const requestBody: ChatCompletionRequest = {
@@ -1225,31 +1326,33 @@ export class FastGPTClient {
       stream: true,
       detail: false,
       messages: apiMessages,
-      variables
+      variables,
     };
 
     // Create AbortController for timeout and cancellation
     const controller = new AbortController();
-    const timeoutId = options?.timeout ? setTimeout(() => {
-      controller.abort();
-    }, options.timeout) : null;
+    const timeoutId = options?.timeout
+      ? setTimeout(() => {
+          controller.abort();
+        }, options.timeout)
+      : null;
 
     // Listen for external abort signal
     if (options?.abortSignal) {
-      options.abortSignal.addEventListener('abort', () => {
+      options.abortSignal.addEventListener("abort", () => {
         controller.abort();
       });
     }
 
     try {
       const response = await fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.config.apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       if (timeoutId) {
@@ -1258,31 +1361,34 @@ export class FastGPTClient {
 
       if (!response.ok) {
         const error = await this.parseErrorResponse(response);
-        
+
         // Throw error to trigger retry logic if retryable
         if (error.retryable) {
           throw new Error(error.message);
         }
-        
+
         // For non-retryable errors, throw immediately
         throw new Error(error.message);
       }
 
       if (!response.body) {
-        throw new Error('No response body received');
+        throw new Error("No response body received");
       }
 
-      return this.processEnhancedStreamResponse(response.body, controller.signal);
+      return this.processEnhancedStreamResponse(
+        response.body,
+        controller.signal
+      );
     } catch (error) {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       // Handle abort errors
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request was aborted');
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Request was aborted");
       }
-      
+
       throw error;
     }
   }
@@ -1292,20 +1398,23 @@ export class FastGPTClient {
    */
   static getErrorMessage(error: FastGPTApiError): string {
     switch (error.type) {
-      case 'network':
-        return 'Unable to connect to FastGPT server. Please check your internet connection and Base URL.';
-      
-      case 'authentication':
-        return 'Authentication failed. Please check your API key and ensure it has the correct permissions.';
-      
-      case 'validation':
-        return 'Configuration error. Please verify your Base URL, App ID, and API key are correct.';
-      
-      case 'server':
-        return 'FastGPT server is temporarily unavailable. Please try again later.';
-      
+      case "network":
+        return "Unable to connect to FastGPT server. Please check your internet connection and Base URL.";
+
+      case "authentication":
+        return "Authentication failed. Please check your API key and ensure it has the correct permissions.";
+
+      case "validation":
+        return "Configuration error. Please verify your Base URL, App ID, and API key are correct.";
+
+      case "server":
+        return "FastGPT server is temporarily unavailable. Please try again later.";
+
       default:
-        return error.message || 'An unexpected error occurred during connection test.';
+        return (
+          error.message ||
+          "An unexpected error occurred during connection test."
+        );
     }
   }
 }
