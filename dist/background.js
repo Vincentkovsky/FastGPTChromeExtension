@@ -1,0 +1,1 @@
+(()=>{"use strict";chrome.runtime.onInstalled.addListener(e=>{console.log("FastGPT Extension installed:",e.reason),"install"===e.reason&&chrome.storage.local.set({setupState:{onboardingComplete:!1,configurationComplete:!1}})}),chrome.runtime.onStartup.addListener(()=>{console.log("FastGPT Extension started")})})();
