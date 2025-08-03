@@ -44,134 +44,100 @@ export class ConfigurationComponent {
    */
   private getConfigurationHTML(): string {
     return `
-      <a href="#main-content" class="skip-link">Skip to main content</a>
-      <div class="configuration-container view-container" role="main" aria-labelledby="config-title">
-        <header class="navigation-header" role="banner">
-          <h1 id="config-title" class="navigation-title">Configure FastGPT Connection</h1>
+      <div class="configuration-container view-container">
+        <div class="navigation-header">
+          <h1 class="navigation-title">Configure FastGPT Connection</h1>
           <div class="navigation-controls">
-            <button class="nav-control-button focusable" id="back-to-onboarding-nav"
-                    aria-label="Go back to setup"
-                    title="Return to setup process">
-              <span aria-hidden="true">←</span> Setup
+            <button class="nav-control-button" id="back-to-onboarding-nav">
+              ← Setup
             </button>
-            <div class="view-state-indicator configuration" aria-label="Current view: Configuration">Config</div>
+            <div class="view-state-indicator configuration">Config</div>
           </div>
-        </header>
+        </div>
         
-        <nav class="breadcrumb-nav" role="navigation" aria-label="Breadcrumb navigation">
+        <div class="breadcrumb-nav">
           <div class="breadcrumb-item">
-            <button class="breadcrumb-link focusable" id="breadcrumb-onboarding"
-                    aria-label="Go to setup">Setup</button>
-            <span class="breadcrumb-separator" aria-hidden="true">›</span>
+            <span class="breadcrumb-link" id="breadcrumb-onboarding">Setup</span>
+            <span class="breadcrumb-separator">›</span>
           </div>
           <div class="breadcrumb-item">
-            <span class="breadcrumb-current" aria-current="page">Configuration</span>
+            <span class="breadcrumb-current">Configuration</span>
           </div>
-        </nav>
+        </div>
         
         <div class="configuration-header">
-          <p class="configuration-subtitle" id="config-description">
+          <p class="configuration-subtitle">
             Enter your FastGPT connection details to start chatting with your knowledge base.
           </p>
         </div>
 
-        <main id="main-content" tabindex="-1">
-          <form id="configuration-form" class="configuration-form" novalidate 
-                aria-describedby="config-description" role="form">
-            <fieldset>
-              <legend class="sr-only">FastGPT Connection Configuration</legend>
-              
-              <div class="form-group">
-                <label for="baseUrl" class="form-label">
-                  FastGPT Base URL <span class="required" aria-label="required">*</span>
-                </label>
-                <input
-                  type="url"
-                  id="baseUrl"
-                  name="baseUrl"
-                  class="form-input focusable"
-                  placeholder="https://your-fastgpt-instance.com"
-                  value="${this.formData.baseUrl || ''}"
-                  aria-describedby="baseUrl-help baseUrl-error"
-                  aria-required="true"
-                  autocomplete="url"
-                />
-                <div id="baseUrl-help" class="field-help">
-                  The base URL of your FastGPT instance (e.g., https://fastgpt.io or your self-hosted URL)
-                </div>
-                <div id="baseUrl-error" class="field-error" role="alert" aria-live="polite" style="display: none;"></div>
-              </div>
+        <form id="configuration-form" class="configuration-form" novalidate>
+          <div class="form-group">
+            <label for="baseUrl" class="form-label">
+              FastGPT Base URL <span class="required">*</span>
+            </label>
+            <input
+              type="url"
+              id="baseUrl"
+              name="baseUrl"
+              class="form-input"
+              placeholder="https://your-fastgpt-instance.com"
+              value="${this.formData.baseUrl || ''}"
+            />
+            <div class="field-help">
+              The base URL of your FastGPT instance (e.g., https://fastgpt.io or your self-hosted URL)
+            </div>
+          </div>
 
-              <div class="form-group">
-                <label for="appId" class="form-label">
-                  App ID <span class="required" aria-label="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="appId"
-                  name="appId"
-                  class="form-input focusable"
-                  placeholder="Enter your FastGPT App ID"
-                  value="${this.formData.appId || ''}"
-                  aria-describedby="appId-help appId-error"
-                  aria-required="true"
-                  autocomplete="off"
-                />
-                <div id="appId-help" class="field-help">
-                  The unique identifier for your FastGPT application
-                </div>
-                <div id="appId-error" class="field-error" role="alert" aria-live="polite" style="display: none;"></div>
-              </div>
+          <div class="form-group">
+            <label for="appId" class="form-label">
+              App ID <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="appId"
+              name="appId"
+              class="form-input"
+              placeholder="Enter your FastGPT App ID"
+              value="${this.formData.appId || ''}"
+            />
+            <div class="field-help">
+              The unique identifier for your FastGPT application
+            </div>
+          </div>
 
-              <div class="form-group">
-                <label for="apiKey" class="form-label">
-                  API Key <span class="required" aria-label="required">*</span>
-                </label>
-                <input
-                  type="password"
-                  id="apiKey"
-                  name="apiKey"
-                  class="form-input focusable"
-                  placeholder="Enter your FastGPT API Key"
-                  value="${this.formData.apiKey || ''}"
-                  aria-describedby="apiKey-help apiKey-error"
-                  aria-required="true"
-                  autocomplete="current-password"
-                />
-                <div id="apiKey-help" class="field-help">
-                  Your FastGPT API key for authentication (will be stored securely)
-                </div>
-                <div id="apiKey-error" class="field-error" role="alert" aria-live="polite" style="display: none;"></div>
-              </div>
+          <div class="form-group">
+            <label for="apiKey" class="form-label">
+              API Key <span class="required">*</span>
+            </label>
+            <input
+              type="password"
+              id="apiKey"
+              name="apiKey"
+              class="form-input"
+              placeholder="Enter your FastGPT API Key"
+              value="${this.formData.apiKey || ''}"
+            />
+            <div class="field-help">
+              Your FastGPT API key for authentication (will be stored securely)
+            </div>
+          </div>
 
-              <div class="form-actions" role="group" aria-label="Configuration actions">
-                <button type="button" id="test-connection" class="nav-button secondary focusable"
-                        aria-describedby="test-connection-help"
-                        title="Test your connection settings">
-                  <span aria-hidden="true">🔍</span> Test Connection
-                </button>
-                <button type="submit" id="save-configuration" class="nav-button primary focusable"
-                        aria-describedby="save-configuration-help"
-                        title="Save your configuration settings">
-                  <span aria-hidden="true">💾</span> Save Configuration
-                </button>
-              </div>
-              
-              <div class="sr-only">
-                <div id="test-connection-help">Tests the connection to your FastGPT instance with the provided settings</div>
-                <div id="save-configuration-help">Saves your configuration and proceeds to the chat interface</div>
-              </div>
-            </fieldset>
-          </form>
-
-          <footer class="configuration-footer">
-            <button id="back-to-onboarding" class="nav-button secondary focusable"
-                    aria-label="Go back to setup process"
-                    title="Return to setup">
-              <span aria-hidden="true">←</span> Back to Setup
+          <div class="form-actions">
+            <button type="button" id="test-connection" class="nav-button secondary">
+              Test Connection
             </button>
-          </footer>
-        </main>
+            <button type="submit" id="save-configuration" class="nav-button primary">
+              Save Configuration
+            </button>
+          </div>
+        </form>
+
+        <div class="configuration-footer">
+          <button id="back-to-onboarding" class="nav-button secondary">
+            ← Back to Setup
+          </button>
+        </div>
       </div>
     `;
   }
@@ -182,9 +148,6 @@ export class ConfigurationComponent {
   private setupEventListeners(): void {
     if (!this.container) return;
 
-    // Add keyboard navigation support
-    this.setupKeyboardNavigation();
-
     const form = this.container.querySelector('#configuration-form') as HTMLFormElement;
     const baseUrlInput = this.container.querySelector('#baseUrl') as HTMLInputElement;
     const appIdInput = this.container.querySelector('#appId') as HTMLInputElement;
@@ -193,24 +156,11 @@ export class ConfigurationComponent {
     const saveButton = this.container.querySelector('#save-configuration') as HTMLButtonElement;
     const backButton = this.container.querySelector('#back-to-onboarding') as HTMLButtonElement;
 
-    // Handle input changes and validation
+    // Handle input changes
     [baseUrlInput, appIdInput, apiKeyInput].forEach(input => {
       if (input) {
         input.addEventListener('input', () => {
           this.handleInputChange(input);
-          this.validateField(input);
-        });
-        
-        input.addEventListener('blur', () => {
-          this.validateField(input);
-        });
-        
-        // Keyboard support for inputs
-        input.addEventListener('keydown', (e: KeyboardEvent) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            this.focusNextField(input);
-          }
         });
       }
     });
@@ -228,38 +178,12 @@ export class ConfigurationComponent {
       testButton.addEventListener('click', () => {
         this.handleTestConnection();
       });
-      
-      // Keyboard support
-      testButton.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.handleTestConnection();
-        }
-      });
-    }
-
-    // Save button keyboard support
-    if (saveButton) {
-      saveButton.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.handleFormSubmit();
-        }
-      });
     }
 
     // Back button
     if (backButton) {
       backButton.addEventListener('click', async () => {
         await this.stateManager.resetOnboarding();
-      });
-      
-      // Keyboard support
-      backButton.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.stateManager.resetOnboarding();
-        }
       });
     }
 
@@ -272,15 +196,6 @@ export class ConfigurationComponent {
         await this.stateManager.setCurrentView('onboarding');
         window.dispatchEvent(new CustomEvent('viewChange'));
       });
-      
-      // Keyboard support
-      backToOnboardingNav.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.stateManager.setCurrentView('onboarding');
-          window.dispatchEvent(new CustomEvent('viewChange'));
-        }
-      });
     }
 
     if (breadcrumbOnboarding) {
@@ -288,182 +203,6 @@ export class ConfigurationComponent {
         await this.stateManager.setCurrentView('onboarding');
         window.dispatchEvent(new CustomEvent('viewChange'));
       });
-      
-      // Keyboard support
-      breadcrumbOnboarding.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.stateManager.setCurrentView('onboarding');
-          window.dispatchEvent(new CustomEvent('viewChange'));
-        }
-      });
-    }
-
-    // Focus management - focus main content when rendered
-    const mainContent = this.container.querySelector('#main-content') as HTMLElement;
-    if (mainContent) {
-      // Focus first input field
-      setTimeout(() => {
-        if (baseUrlInput) {
-          baseUrlInput.focus();
-        }
-      }, 100);
-    }
-
-    // Add keyboard navigation indicator
-    this.container.classList.add('keyboard-navigation-active');
-  }
-
-  /**
-   * Setup keyboard navigation for the configuration form
-   */
-  private setupKeyboardNavigation(): void {
-    if (!this.container) return;
-
-    // Global keyboard shortcuts
-    this.container.addEventListener('keydown', async (e) => {
-      // Don't interfere with form inputs when they have focus
-      if (e.target instanceof HTMLInputElement && e.target.type !== 'button') {
-        return;
-      }
-      
-      switch (e.key) {
-        case 'Escape':
-          // Go back to onboarding
-          e.preventDefault();
-          await this.stateManager.setCurrentView('onboarding');
-          window.dispatchEvent(new CustomEvent('viewChange'));
-          break;
-          
-        case 'F5':
-          // Test connection (Ctrl+F5 or just F5)
-          e.preventDefault();
-          this.handleTestConnection();
-          break;
-          
-        case 's':
-          // Save configuration (Ctrl+S)
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            this.handleFormSubmit();
-          }
-          break;
-      }
-    });
-
-    // Tab navigation enhancement
-    const focusableElements = this.container.querySelectorAll('.focusable');
-    focusableElements.forEach((element, index) => {
-      element.addEventListener('keydown', (e: Event) => {
-        const keyEvent = e as KeyboardEvent;
-        if (keyEvent.key === 'Tab') {
-          // Let default tab behavior work, but ensure proper focus management
-          if (keyEvent.shiftKey && index === 0) {
-            // Shift+Tab on first element - focus last element
-            e.preventDefault();
-            (focusableElements[focusableElements.length - 1] as HTMLElement).focus();
-          } else if (!keyEvent.shiftKey && index === focusableElements.length - 1) {
-            // Tab on last element - focus first element
-            e.preventDefault();
-            (focusableElements[0] as HTMLElement).focus();
-          }
-        }
-      });
-    });
-  }
-
-  /**
-   * Focus the next field in the form
-   */
-  private focusNextField(currentInput: HTMLInputElement): void {
-    const inputs = ['baseUrl', 'appId', 'apiKey'];
-    const currentIndex = inputs.indexOf(currentInput.id);
-    
-    if (currentIndex < inputs.length - 1) {
-      const nextInput = this.container?.querySelector(`#${inputs[currentIndex + 1]}`) as HTMLInputElement;
-      if (nextInput) {
-        nextInput.focus();
-      }
-    } else {
-      // Focus test connection button
-      const testButton = this.container?.querySelector('#test-connection') as HTMLButtonElement;
-      if (testButton) {
-        testButton.focus();
-      }
-    }
-  }
-
-  /**
-   * Validate a form field and show appropriate feedback
-   */
-  private validateField(input: HTMLInputElement): void {
-    const fieldName = input.name;
-    const value = input.value.trim();
-    const errorElement = this.container?.querySelector(`#${fieldName}-error`) as HTMLElement;
-    
-    if (!errorElement) return;
-
-    let errorMessage = '';
-    let isValid = true;
-
-    // Reset previous error state
-    input.classList.remove('error');
-    errorElement.style.display = 'none';
-    errorElement.textContent = '';
-
-    // Validate based on field type
-    switch (fieldName) {
-      case 'baseUrl':
-        if (!value) {
-          errorMessage = 'Base URL is required';
-          isValid = false;
-        } else if (!this.isValidUrl(value)) {
-          errorMessage = 'Please enter a valid URL starting with https://';
-          isValid = false;
-        }
-        break;
-        
-      case 'appId':
-        if (!value) {
-          errorMessage = 'App ID is required';
-          isValid = false;
-        } else if (value.length < 3) {
-          errorMessage = 'App ID must be at least 3 characters long';
-          isValid = false;
-        }
-        break;
-        
-      case 'apiKey':
-        if (!value) {
-          errorMessage = 'API Key is required';
-          isValid = false;
-        } else if (value.length < 10) {
-          errorMessage = 'API Key appears to be too short';
-          isValid = false;
-        }
-        break;
-    }
-
-    // Show error if validation failed
-    if (!isValid) {
-      input.classList.add('error');
-      errorElement.textContent = errorMessage;
-      errorElement.style.display = 'block';
-      input.setAttribute('aria-invalid', 'true');
-    } else {
-      input.setAttribute('aria-invalid', 'false');
-    }
-  }
-
-  /**
-   * Check if a string is a valid URL
-   */
-  private isValidUrl(string: string): boolean {
-    try {
-      const url = new URL(string);
-      return url.protocol === 'https:';
-    } catch {
-      return false;
     }
   }
 

@@ -72,73 +72,60 @@ export class OnboardingComponent {
     const progress = ((this.currentStepIndex + 1) / this.steps.length) * 100;
 
     return `
-      <a href="#main-content" class="skip-link">Skip to main content</a>
-      <div class="onboarding-container view-container" role="main" aria-labelledby="onboarding-title">
-        <header class="navigation-header" role="banner">
-          <h1 id="onboarding-title" class="navigation-title">FastGPT Setup</h1>
+      <div class="onboarding-container view-container">
+        <div class="navigation-header">
+          <h1 class="navigation-title">FastGPT Setup</h1>
           <div class="navigation-controls">
-            <div class="view-state-indicator onboarding" aria-label="Current view: Setup">Setup</div>
+            <div class="view-state-indicator onboarding">Setup</div>
           </div>
-        </header>
+        </div>
         
         <div class="onboarding-header">
-          <div class="progress-bar" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" aria-label="Setup progress">
+          <div class="progress-bar">
             <div class="progress-fill" style="width: ${progress}%"></div>
           </div>
-          <div class="step-counter" aria-live="polite">Step ${this.currentStepIndex + 1} of ${this.steps.length}</div>
+          <div class="step-counter">Step ${this.currentStepIndex + 1} of ${this.steps.length}</div>
         </div>
 
-        <main id="main-content" class="onboarding-content" tabindex="-1">
-          <div class="step-icon" aria-hidden="true">
+        <div class="onboarding-content">
+          <div class="step-icon">
             ${this.getStepIcon(currentStep.id)}
           </div>
           
-          <h2 class="step-title" id="step-title">${currentStep.title}</h2>
-          <p class="step-description" id="step-description">${currentStep.description}</p>
+          <h2 class="step-title">${currentStep.title}</h2>
+          <p class="step-description">${currentStep.description}</p>
 
           ${currentStep.actionUrl ? `
             <div class="step-action">
-              <button class="action-button focusable" data-url="${currentStep.actionUrl}" 
-                      aria-describedby="step-description"
-                      title="Opens ${currentStep.actionUrl} in a new tab">
+              <button class="action-button" data-url="${currentStep.actionUrl}">
                 ${currentStep.actionText || 'Open Link'}
-                <span class="sr-only"> (opens in new tab)</span>
               </button>
             </div>
           ` : ''}
 
           ${this.getStepSpecificContent(currentStep.id)}
-        </main>
+        </div>
 
-        <nav class="onboarding-navigation" role="navigation" aria-label="Setup navigation">
-          <button class="nav-button secondary focusable" id="prev-button" 
-                  ${this.currentStepIndex === 0 ? 'disabled aria-disabled="true"' : 'aria-disabled="false"'}
-                  aria-label="Go to previous step"
-                  title="Previous step">
-            <span aria-hidden="true">←</span> Previous
+        <div class="onboarding-navigation">
+          <button class="nav-button secondary" id="prev-button" ${this.currentStepIndex === 0 ? 'disabled' : ''}>
+            Previous
           </button>
           
           <div class="nav-buttons-right">
             ${this.currentStepIndex === this.steps.length - 1 ? `
-              <button class="nav-button primary focusable" id="complete-button"
-                      aria-label="Complete setup and proceed to configuration"
-                      title="Complete setup">
+              <button class="nav-button primary" id="complete-button">
                 Complete Setup
               </button>
             ` : `
-              <button class="nav-button secondary focusable" id="skip-button"
-                      aria-label="Skip remaining steps and go to configuration"
-                      title="Skip to configuration">
+              <button class="nav-button secondary" id="skip-button">
                 Skip to Configuration
               </button>
-              <button class="nav-button primary focusable" id="next-button"
-                      aria-label="Go to next step"
-                      title="Next step">
-                Next <span aria-hidden="true">→</span>
+              <button class="nav-button primary" id="next-button">
+                Next
               </button>
             `}
           </div>
-        </nav>
+        </div>
       </div>
     `;
   }
@@ -178,25 +165,18 @@ export class OnboardingComponent {
       case 'visit-fastgpt':
         return `
           <div class="platform-options">
-            <p class="platform-note">Choose your preferred FastGPT platform:</p>
-            <div class="platform-buttons" role="group" aria-label="FastGPT platform options">
-              <button class="platform-button focusable" data-url="https://fastgpt.io"
-                      aria-label="Visit FastGPT.io global platform"
-                      title="Opens FastGPT.io in a new tab">
+            <div class="platform-buttons">
+              <button class="platform-button" data-url="https://fastgpt.io">
                 <div class="platform-info">
                   <strong>FastGPT.io</strong>
                   <span>Global platform</span>
                 </div>
-                <span class="sr-only"> (opens in new tab)</span>
               </button>
-              <button class="platform-button focusable" data-url="https://fastgpt.cn"
-                      aria-label="Visit FastGPT.cn China platform"
-                      title="Opens FastGPT.cn in a new tab">
+              <button class="platform-button" data-url="https://fastgpt.cn">
                 <div class="platform-info">
                   <strong>FastGPT.cn</strong>
                   <span>China platform</span>
                 </div>
-                <span class="sr-only"> (opens in new tab)</span>
               </button>
             </div>
           </div>
@@ -253,9 +233,6 @@ export class OnboardingComponent {
   private attachEventListeners(container: HTMLElement): void {
     console.log('Attaching event listeners...');
     
-    // Add keyboard navigation support
-    this.setupKeyboardNavigation(container);
-    
     // Previous button
     const prevButton = container.querySelector('#prev-button') as HTMLButtonElement;
     console.log('Previous button found:', !!prevButton);
@@ -263,14 +240,6 @@ export class OnboardingComponent {
       prevButton.addEventListener('click', async () => {
         console.log('Previous button clicked');
         await this.goToPreviousStep(container);
-      });
-      
-      // Keyboard support
-      prevButton.addEventListener('keydown', async (e: KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.goToPreviousStep(container);
-        }
       });
     }
 
@@ -286,16 +255,6 @@ export class OnboardingComponent {
           console.error('Error in goToNextStep:', error);
         });
       });
-      
-      // Keyboard support
-      nextButton.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.goToNextStep(container).catch(error => {
-            console.error('Error in goToNextStep:', error);
-          });
-        }
-      });
     }
 
     // Skip button
@@ -305,28 +264,12 @@ export class OnboardingComponent {
         console.log('Skip button clicked');
         await this.completeOnboarding();
       });
-      
-      // Keyboard support
-      skipButton.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.completeOnboarding();
-        }
-      });
     }
 
     // Complete button
     const completeButton = container.querySelector('#complete-button') as HTMLButtonElement;
     if (completeButton) {
       completeButton.addEventListener('click', async () => await this.completeOnboarding());
-      
-      // Keyboard support
-      completeButton.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.completeOnboarding();
-        }
-      });
     }
 
     // Action buttons (external links)
@@ -339,112 +282,7 @@ export class OnboardingComponent {
           this.markCurrentStepCompleted();
         }
       });
-      
-      // Keyboard support for action buttons
-      button.addEventListener('keydown', (e: Event) => {
-        const keyEvent = e as KeyboardEvent;
-        if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
-          e.preventDefault();
-          const url = (e.target as HTMLElement).getAttribute('data-url');
-          if (url) {
-            this.openExternalLink(url);
-            this.markCurrentStepCompleted();
-          }
-        }
-      });
     });
-
-    // Focus management - focus main content when rendered
-    const mainContent = container.querySelector('#main-content') as HTMLElement;
-    if (mainContent) {
-      // Announce step change to screen readers
-      const stepTitle = container.querySelector('#step-title') as HTMLElement;
-      if (stepTitle) {
-        stepTitle.setAttribute('aria-live', 'polite');
-      }
-    }
-  }
-
-  /**
-   * Setup keyboard navigation for the onboarding interface
-   */
-  private setupKeyboardNavigation(container: HTMLElement): void {
-    // Global keyboard shortcuts
-    container.addEventListener('keydown', async (e) => {
-      // Don't interfere with form inputs
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-      
-      switch (e.key) {
-        case 'ArrowLeft':
-        case 'ArrowUp':
-          // Previous step
-          e.preventDefault();
-          if (this.currentStepIndex > 0) {
-            await this.goToPreviousStep(container);
-          }
-          break;
-          
-        case 'ArrowRight':
-        case 'ArrowDown':
-          // Next step
-          e.preventDefault();
-          if (this.currentStepIndex < this.steps.length - 1) {
-            await this.goToNextStep(container);
-          }
-          break;
-          
-        case 'Home':
-          // Go to first step
-          e.preventDefault();
-          if (this.currentStepIndex !== 0) {
-            this.currentStepIndex = 0;
-            this.saveProgress();
-            await this.render(container);
-          }
-          break;
-          
-        case 'End':
-          // Go to last step
-          e.preventDefault();
-          if (this.currentStepIndex !== this.steps.length - 1) {
-            this.currentStepIndex = this.steps.length - 1;
-            this.saveProgress();
-            await this.render(container);
-          }
-          break;
-          
-        case 'Escape':
-          // Skip to configuration
-          e.preventDefault();
-          await this.completeOnboarding();
-          break;
-      }
-    });
-
-    // Tab navigation enhancement
-    const focusableElements = container.querySelectorAll('.focusable');
-    focusableElements.forEach((element, index) => {
-      element.addEventListener('keydown', (e: Event) => {
-        const keyEvent = e as KeyboardEvent;
-        if (keyEvent.key === 'Tab') {
-          // Let default tab behavior work, but ensure proper focus management
-          if (keyEvent.shiftKey && index === 0) {
-            // Shift+Tab on first element - focus last element
-            e.preventDefault();
-            (focusableElements[focusableElements.length - 1] as HTMLElement).focus();
-          } else if (!keyEvent.shiftKey && index === focusableElements.length - 1) {
-            // Tab on last element - focus first element
-            e.preventDefault();
-            (focusableElements[0] as HTMLElement).focus();
-          }
-        }
-      });
-    });
-
-    // Add keyboard navigation indicator
-    container.classList.add('keyboard-navigation-active');
   }
 
   /**

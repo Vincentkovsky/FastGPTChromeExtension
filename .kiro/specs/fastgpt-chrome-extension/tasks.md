@@ -116,16 +116,16 @@
     - Add data export and import functionality
     - _Requirements: 4.5, 5.5_
 
-- [x] 8. Implement responsive design and accessibility
+- [ ] 8. Implement responsive design and accessibility
 
-  - [x] 8.1 Create responsive layout for different popup sizes
+  - [ ] 8.1 Create responsive layout for different popup sizes
 
     - Implement adaptive CSS for various screen sizes
     - Ensure proper scaling of typography and interface elements
     - Test interface across different browser zoom levels
     - _Requirements: 4.7_
 
-  - [x] 8.2 Add accessibility features and keyboard navigation
+  - [ ] 8.2 Add accessibility features and keyboard navigation
     - Implement proper ARIA labels and semantic HTML structure
     - Add keyboard navigation support for all interactive elements
     - Ensure screen reader compatibility and high contrast support

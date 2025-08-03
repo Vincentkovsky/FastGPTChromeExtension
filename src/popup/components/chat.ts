@@ -52,66 +52,53 @@ export class ChatComponent {
    */
   private createChatHTML(): string {
     return `
-      <a href="#main-content" class="skip-link">Skip to main content</a>
-      <div class="chat-container view-container" role="main" aria-labelledby="chat-title">
-        <header class="navigation-header" role="banner">
-          <h1 id="chat-title" class="navigation-title">FastGPT Chat</h1>
+      <div class="chat-container view-container">
+        <div class="navigation-header">
+          <h1 class="navigation-title">FastGPT Chat</h1>
           <div class="navigation-controls">
-            <button class="nav-control-button focusable" id="go-to-config-nav" 
-                    aria-label="Go to configuration"
-                    title="Open configuration settings">
-              <span aria-hidden="true">⚙️</span> Config
+            <button class="nav-control-button" id="go-to-config-nav" title="Configuration">
+              ⚙️ Config
             </button>
-            <button class="nav-control-button focusable" id="settings-button" 
-                    aria-label="Open settings menu"
-                    title="Open chat settings and options"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-              <span aria-hidden="true">⋯</span>
-              <span class="sr-only">Settings</span>
+            <button class="nav-control-button" id="settings-button" title="Settings">
+              ⋯
             </button>
-            <div class="view-state-indicator chat" aria-label="Current view: Chat">Chat</div>
+            <div class="view-state-indicator chat">Chat</div>
           </div>
-        </header>
+        </div>
         
-        <nav class="breadcrumb-nav" role="navigation" aria-label="Breadcrumb navigation">
+        <div class="breadcrumb-nav">
           <div class="breadcrumb-item">
-            <button class="breadcrumb-link focusable" id="breadcrumb-onboarding"
-                    aria-label="Go to setup">Setup</button>
-            <span class="breadcrumb-separator" aria-hidden="true">›</span>
+            <span class="breadcrumb-link" id="breadcrumb-onboarding">Setup</span>
+            <span class="breadcrumb-separator">›</span>
           </div>
           <div class="breadcrumb-item">
-            <button class="breadcrumb-link focusable" id="breadcrumb-configuration"
-                    aria-label="Go to configuration">Configuration</button>
-            <span class="breadcrumb-separator" aria-hidden="true">›</span>
+            <span class="breadcrumb-link" id="breadcrumb-configuration">Configuration</span>
+            <span class="breadcrumb-separator">›</span>
           </div>
           <div class="breadcrumb-item">
-            <span class="breadcrumb-current" aria-current="page">Chat</span>
+            <span class="breadcrumb-current">Chat</span>
           </div>
-        </nav>
+        </div>
         
         <div class="chat-header">
-          <div class="status-bar" role="status" aria-label="Connection status">
+          <div class="status-bar">
             <div class="status-item">
-              <div class="status-indicator" aria-label="Connected to FastGPT"></div>
+              <div class="status-indicator"></div>
               <span>Connected</span>
             </div>
             <div class="status-item">
-              <span id="message-count" aria-live="polite">0 messages</span>
+              <span id="message-count">0 messages</span>
             </div>
           </div>
         </div>
         
-        <main id="main-content" class="chat-messages" id="chat-messages" 
-              role="log" aria-live="polite" aria-label="Chat conversation"
-              tabindex="0">
+        <div class="chat-messages" id="chat-messages">
           <!-- Messages will be rendered here -->
-        </main>
+        </div>
         
-        <div class="chat-input-container" role="region" aria-label="Message input">
-          <div class="typing-indicator" id="typing-indicator" style="display: none;"
-               role="status" aria-live="polite" aria-label="FastGPT is typing">
-            <span class="typing-dots" aria-hidden="true">
+        <div class="chat-input-container">
+          <div class="typing-indicator" id="typing-indicator" style="display: none;">
+            <span class="typing-dots">
               <span></span>
               <span></span>
               <span></span>
@@ -119,33 +106,21 @@ export class ChatComponent {
             <span class="typing-text">FastGPT is typing...</span>
           </div>
           
-          <div class="chat-input-wrapper" role="group" aria-label="Message composition">
-            <label for="message-input" class="sr-only">Type your message</label>
+          <div class="chat-input-wrapper">
             <textarea 
               id="message-input" 
-              class="message-input focusable" 
+              class="message-input" 
               placeholder="Type your message here..."
               rows="1"
-              aria-label="Type your message here"
-              aria-describedby="input-help"
-              maxlength="4000"
             ></textarea>
-            <div id="input-help" class="sr-only">
-              Press Enter to send, Shift+Enter for new line. Maximum 4000 characters.
-            </div>
-            <button id="send-button" class="send-button focusable" disabled
-                    aria-label="Send message"
-                    title="Send your message to FastGPT"
-                    type="button">
-              <span class="send-icon" aria-hidden="true">➤</span>
-              <span class="sr-only">Send</span>
+            <button id="send-button" class="send-button" disabled>
+              <span class="send-icon">➤</span>
             </button>
           </div>
         </div>
         
-        <div class="loading-overlay" id="loading-overlay" style="display: none;"
-             role="status" aria-live="assertive" aria-label="Processing message">
-          <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-overlay" id="loading-overlay" style="display: none;">
+          <div class="loading-spinner"></div>
           <div class="loading-text">Sending message...</div>
         </div>
       </div>
@@ -156,23 +131,18 @@ export class ChatComponent {
    * Setup event listeners for the chat interface
    */
   private setupEventListeners(container: HTMLElement): void {
-    // Add keyboard navigation support
-    this.setupKeyboardNavigation(container);
-
     const messageInput = container.querySelector('#message-input') as HTMLTextAreaElement;
     const sendButton = container.querySelector('#send-button') as HTMLButtonElement;
     const settingsButton = container.querySelector('#settings-button') as HTMLButtonElement;
     const goToConfigNav = container.querySelector('#go-to-config-nav') as HTMLButtonElement;
     const breadcrumbOnboarding = container.querySelector('#breadcrumb-onboarding') as HTMLElement;
     const breadcrumbConfiguration = container.querySelector('#breadcrumb-configuration') as HTMLElement;
-    const chatMessages = container.querySelector('#chat-messages') as HTMLElement;
 
     if (messageInput) {
       // Auto-resize textarea
       messageInput.addEventListener('input', () => {
         this.autoResizeTextarea(messageInput);
         this.updateSendButtonState(messageInput, sendButton);
-        this.announceCharacterCount(messageInput);
       });
 
       // Handle Enter key (send message) and Shift+Enter (new line)
@@ -180,11 +150,6 @@ export class ChatComponent {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           this.handleSendMessage(messageInput);
-        } else if (e.key === 'Escape') {
-          // Clear input on Escape
-          messageInput.value = '';
-          this.autoResizeTextarea(messageInput);
-          this.updateSendButtonState(messageInput, sendButton);
         }
       });
 
@@ -196,46 +161,19 @@ export class ChatComponent {
       sendButton.addEventListener('click', () => {
         this.handleSendMessage(messageInput);
       });
-      
-      // Keyboard support for send button
-      sendButton.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.handleSendMessage(messageInput);
-        }
-      });
     }
 
     if (settingsButton) {
       settingsButton.addEventListener('click', () => {
         this.handleSettingsClick();
-        // Update aria-expanded
-        settingsButton.setAttribute('aria-expanded', 'true');
-      });
-      
-      // Keyboard support for settings button
-      settingsButton.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.handleSettingsClick();
-          settingsButton.setAttribute('aria-expanded', 'true');
-        }
       });
     }
 
-    // Navigation controls with keyboard support
+    // Navigation controls
     if (goToConfigNav) {
       goToConfigNav.addEventListener('click', async () => {
         await this.stateManager.setCurrentView('configuration');
         window.dispatchEvent(new CustomEvent('viewChange'));
-      });
-      
-      goToConfigNav.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.stateManager.setCurrentView('configuration');
-          window.dispatchEvent(new CustomEvent('viewChange'));
-        }
       });
     }
 
@@ -244,14 +182,6 @@ export class ChatComponent {
         await this.stateManager.setCurrentView('onboarding');
         window.dispatchEvent(new CustomEvent('viewChange'));
       });
-      
-      breadcrumbOnboarding.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.stateManager.setCurrentView('onboarding');
-          window.dispatchEvent(new CustomEvent('viewChange'));
-        }
-      });
     }
 
     if (breadcrumbConfiguration) {
@@ -259,176 +189,13 @@ export class ChatComponent {
         await this.stateManager.setCurrentView('configuration');
         window.dispatchEvent(new CustomEvent('viewChange'));
       });
-      
-      breadcrumbConfiguration.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          await this.stateManager.setCurrentView('configuration');
-          window.dispatchEvent(new CustomEvent('viewChange'));
-        }
-      });
-    }
-
-    // Chat messages keyboard navigation
-    if (chatMessages) {
-      chatMessages.addEventListener('keydown', (e) => {
-        switch (e.key) {
-          case 'Home':
-            e.preventDefault();
-            chatMessages.scrollTop = 0;
-            break;
-          case 'End':
-            e.preventDefault();
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            break;
-          case 'PageUp':
-            e.preventDefault();
-            chatMessages.scrollTop -= chatMessages.clientHeight * 0.8;
-            break;
-          case 'PageDown':
-            e.preventDefault();
-            chatMessages.scrollTop += chatMessages.clientHeight * 0.8;
-            break;
-        }
-      });
     }
 
     // Update message count
     this.updateMessageCount();
-
-    // Add keyboard navigation indicator
-    container.classList.add('keyboard-navigation-active');
-
-    // Focus management - focus message input when rendered
-    setTimeout(() => {
-      if (messageInput) {
-        messageInput.focus();
-      }
-    }, 100);
   }
 
-  /**
-   * Setup keyboard navigation for the chat interface
-   */
-  private setupKeyboardNavigation(container: HTMLElement): void {
-    // Global keyboard shortcuts
-    container.addEventListener('keydown', async (e) => {
-      // Don't interfere with textarea input
-      if (e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-      
-      switch (e.key) {
-        case 'n':
-          // New chat (Ctrl+N)
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            await this.startNewChat();
-          }
-          break;
-          
-        case 'k':
-          // Clear chat (Ctrl+K)
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            if (await this.confirmAction('Clear Chat History', 'Are you sure you want to clear all chat history? This action cannot be undone.')) {
-              await this.clearChatHistory();
-            }
-          }
-          break;
-          
-        case ',':
-          // Settings (Ctrl+,)
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            this.handleSettingsClick();
-          }
-          break;
-          
-        case '/':
-          // Focus message input
-          e.preventDefault();
-          const messageInput = container.querySelector('#message-input') as HTMLTextAreaElement;
-          if (messageInput) {
-            messageInput.focus();
-          }
-          break;
-          
-        case 'Escape':
-          // Close any open menus or focus message input
-          const settingsMenu = document.querySelector('.settings-menu');
-          if (settingsMenu) {
-            document.body.removeChild(settingsMenu);
-            const settingsButton = container.querySelector('#settings-button') as HTMLButtonElement;
-            if (settingsButton) {
-              settingsButton.setAttribute('aria-expanded', 'false');
-              settingsButton.focus();
-            }
-          } else {
-            const messageInput = container.querySelector('#message-input') as HTMLTextAreaElement;
-            if (messageInput) {
-              messageInput.focus();
-            }
-          }
-          break;
-      }
-    });
 
-    // Tab navigation enhancement
-    const focusableElements = container.querySelectorAll('.focusable');
-    focusableElements.forEach((element, index) => {
-      element.addEventListener('keydown', (e: Event) => {
-        const keyEvent = e as KeyboardEvent;
-        if (keyEvent.key === 'Tab') {
-          // Let default tab behavior work, but ensure proper focus management
-          if (keyEvent.shiftKey && index === 0) {
-            // Shift+Tab on first element - focus last element
-            e.preventDefault();
-            (focusableElements[focusableElements.length - 1] as HTMLElement).focus();
-          } else if (!keyEvent.shiftKey && index === focusableElements.length - 1) {
-            // Tab on last element - focus first element
-            e.preventDefault();
-            (focusableElements[0] as HTMLElement).focus();
-          }
-        }
-      });
-    });
-  }
-
-  /**
-   * Announce character count for screen readers
-   */
-  private announceCharacterCount(input: HTMLTextAreaElement): void {
-    const currentLength = input.value.length;
-    const maxLength = parseInt(input.getAttribute('maxlength') || '4000');
-    const remaining = maxLength - currentLength;
-    
-    // Only announce when approaching limit
-    if (remaining <= 100 && remaining % 10 === 0) {
-      const announcement = `${remaining} characters remaining`;
-      this.announceToScreenReader(announcement);
-    }
-  }
-
-  /**
-   * Announce message to screen readers
-   */
-  private announceToScreenReader(message: string): void {
-    const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', 'polite');
-    announcement.setAttribute('aria-atomic', 'true');
-    announcement.className = 'sr-only';
-    announcement.textContent = message;
-    
-    document.body.appendChild(announcement);
-    
-    // Remove after announcement
-    setTimeout(() => {
-      if (announcement.parentNode) {
-        document.body.removeChild(announcement);
-      }
-    }, 1000);
-  }
 
   /**
    * Auto-resize textarea based on content
