@@ -3,12 +3,14 @@ import { ExtensionStateManager } from "../state/stateManager";
 import { OnboardingComponent } from "./components/onboarding";
 import { ConfigurationComponent } from "./components/configuration";
 import { ChatComponent } from "./components/chat";
+import { SettingsComponent } from "./components/settings";
 
 class PopupApp {
   private stateManager: ExtensionStateManager;
   private onboardingComponent: OnboardingComponent;
   private configurationComponent: ConfigurationComponent;
   private chatComponent: ChatComponent;
+  private settingsComponent: SettingsComponent;
   private appContainer: HTMLElement | null = null;
 
   constructor() {
@@ -16,6 +18,7 @@ class PopupApp {
     this.onboardingComponent = new OnboardingComponent(this.stateManager);
     this.configurationComponent = new ConfigurationComponent(this.stateManager);
     this.chatComponent = new ChatComponent(this.stateManager);
+    this.settingsComponent = new SettingsComponent(this.stateManager);
     this.setupEventListeners();
   }
 
@@ -68,6 +71,9 @@ class PopupApp {
         case "chat":
           await this.renderChatView();
           break;
+        case "settings":
+          await this.renderSettingsView();
+          break;
         default:
           await this.renderOnboardingView();
       }
@@ -107,6 +113,16 @@ class PopupApp {
     if (!this.appContainer) return;
     await this.chatComponent.render(this.appContainer);
     console.log("Chat view rendered");
+  }
+
+  /**
+   * Render the settings view
+   */
+  private async renderSettingsView(): Promise<void> {
+    console.log("Rendering settings view");
+    if (!this.appContainer) return;
+    await this.settingsComponent.render(this.appContainer);
+    console.log("Settings view rendered");
   }
 
   /**

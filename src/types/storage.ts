@@ -9,7 +9,7 @@ export interface FastGPTConfig {
 export interface ExtensionState {
   setupComplete: boolean;
   configurationComplete: boolean;
-  currentView: 'onboarding' | 'configuration' | 'chat';
+  currentView: 'onboarding' | 'configuration' | 'chat' | 'settings';
   fastgptConfig?: FastGPTConfig;
 }
 

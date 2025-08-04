@@ -213,7 +213,7 @@ export class ExtensionStateManager {
   /**
    * Get the current view that should be displayed
    */
-  getCurrentView(): 'onboarding' | 'configuration' | 'chat' {
+  getCurrentView(): 'onboarding' | 'configuration' | 'chat' | 'settings' {
     return this.currentState?.currentView || 'onboarding';
   }
 
@@ -237,7 +237,7 @@ export class ExtensionStateManager {
   /**
    * Validate state transitions
    */
-  canTransitionTo(targetView: 'onboarding' | 'configuration' | 'chat'): boolean {
+  canTransitionTo(targetView: 'onboarding' | 'configuration' | 'chat' | 'settings'): boolean {
     const currentView = this.getCurrentView();
     
     switch (targetView) {
@@ -247,6 +247,8 @@ export class ExtensionStateManager {
         return this.isOnboardingComplete();
       case 'chat':
         return this.isOnboardingComplete() && this.isConfigurationComplete();
+      case 'settings':
+        return this.isOnboardingComplete() && this.isConfigurationComplete(); // Settings only available after setup
       default:
         return false;
     }
@@ -255,7 +257,7 @@ export class ExtensionStateManager {
   /**
    * Force a state transition (for testing purposes)
    */
-  async forceTransitionTo(targetView: 'onboarding' | 'configuration' | 'chat'): Promise<StorageResult<ExtensionState>> {
+  async forceTransitionTo(targetView: 'onboarding' | 'configuration' | 'chat' | 'settings'): Promise<StorageResult<ExtensionState>> {
     if (!this.canTransitionTo(targetView)) {
       return {
         success: false,
@@ -282,7 +284,7 @@ export class ExtensionStateManager {
   /**
    * Set the current view (for navigation)
    */
-  async setCurrentView(targetView: 'onboarding' | 'configuration' | 'chat'): Promise<StorageResult<ExtensionState>> {
+  async setCurrentView(targetView: 'onboarding' | 'configuration' | 'chat' | 'settings'): Promise<StorageResult<ExtensionState>> {
     if (!this.canTransitionTo(targetView)) {
       return {
         success: false,
@@ -297,6 +299,26 @@ export class ExtensionStateManager {
     }
 
     return { success: true, data: this.currentState! };
+  }
+
+  /**
+   * Set FastGPT configuration
+   */
+  setFastGPTConfig(config: FastGPTConfig): void {
+    if (this.currentState) {
+      this.currentState.fastgptConfig = config;
+      this.notifyStateChange(this.currentState);
+    }
+  }
+
+  /**
+   * Clear FastGPT configuration
+   */
+  clearFastGPTConfig(): void {
+    if (this.currentState) {
+      this.currentState.fastgptConfig = undefined;
+      this.notifyStateChange(this.currentState);
+    }
   }
 
   /**

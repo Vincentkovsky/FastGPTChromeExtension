@@ -53,42 +53,12 @@ export class ChatComponent {
   private createChatHTML(): string {
     return `
       <div class="chat-container view-container">
-        <div class="navigation-header">
-          <h1 class="navigation-title">FastGPT Chat</h1>
-          <div class="navigation-controls">
-            <button class="nav-control-button" id="go-to-config-nav" title="Configuration">
-              ⚙️ Config
-            </button>
-            <button class="nav-control-button" id="settings-button" title="Settings">
+        <div class="chat-header">
+          <h1 class="chat-title">FastGPT Chat</h1>
+          <div class="chat-controls">
+            <button class="settings-button" id="settings-button" title="Settings">
               ⋯
             </button>
-            <div class="view-state-indicator chat">Chat</div>
-          </div>
-        </div>
-        
-        <div class="breadcrumb-nav">
-          <div class="breadcrumb-item">
-            <span class="breadcrumb-link" id="breadcrumb-onboarding">Setup</span>
-            <span class="breadcrumb-separator">›</span>
-          </div>
-          <div class="breadcrumb-item">
-            <span class="breadcrumb-link" id="breadcrumb-configuration">Configuration</span>
-            <span class="breadcrumb-separator">›</span>
-          </div>
-          <div class="breadcrumb-item">
-            <span class="breadcrumb-current">Chat</span>
-          </div>
-        </div>
-        
-        <div class="chat-header">
-          <div class="status-bar">
-            <div class="status-item">
-              <div class="status-indicator"></div>
-              <span>Connected</span>
-            </div>
-            <div class="status-item">
-              <span id="message-count">0 messages</span>
-            </div>
           </div>
         </div>
         
@@ -118,8 +88,6 @@ export class ChatComponent {
             </button>
           </div>
         </div>
-        
-
       </div>
     `;
   }
@@ -131,9 +99,6 @@ export class ChatComponent {
     const messageInput = container.querySelector('#message-input') as HTMLTextAreaElement;
     const sendButton = container.querySelector('#send-button') as HTMLButtonElement;
     const settingsButton = container.querySelector('#settings-button') as HTMLButtonElement;
-    const goToConfigNav = container.querySelector('#go-to-config-nav') as HTMLButtonElement;
-    const breadcrumbOnboarding = container.querySelector('#breadcrumb-onboarding') as HTMLElement;
-    const breadcrumbConfiguration = container.querySelector('#breadcrumb-configuration') as HTMLElement;
 
     if (messageInput) {
       // Auto-resize textarea
@@ -161,30 +126,8 @@ export class ChatComponent {
     }
 
     if (settingsButton) {
-      settingsButton.addEventListener('click', () => {
-        this.handleSettingsClick();
-      });
-    }
-
-    // Navigation controls
-    if (goToConfigNav) {
-      goToConfigNav.addEventListener('click', async () => {
-        await this.stateManager.setCurrentView('configuration');
-        window.dispatchEvent(new CustomEvent('viewChange'));
-      });
-    }
-
-    if (breadcrumbOnboarding) {
-      breadcrumbOnboarding.addEventListener('click', async () => {
-        await this.stateManager.setCurrentView('onboarding');
-        window.dispatchEvent(new CustomEvent('viewChange'));
-      });
-    }
-
-    if (breadcrumbConfiguration) {
-      breadcrumbConfiguration.addEventListener('click', async () => {
-        await this.stateManager.setCurrentView('configuration');
-        window.dispatchEvent(new CustomEvent('viewChange'));
+      settingsButton.addEventListener('click', async () => {
+        await this.handleSettingsClick();
       });
     }
 
@@ -260,143 +203,13 @@ export class ChatComponent {
   /**
    * Handle settings button click
    */
-  private handleSettingsClick(): void {
-    // Show settings menu with options
-    this.showSettingsMenu();
+  private async handleSettingsClick(): Promise<void> {
+    // Navigate to settings page
+    await this.stateManager.setCurrentView('settings');
+    window.dispatchEvent(new CustomEvent('viewChange'));
   }
 
-  /**
-   * Show settings menu with chat management options
-   */
-  private showSettingsMenu(): void {
-    const settingsMenu = document.createElement('div');
-    settingsMenu.className = 'settings-menu';
-    settingsMenu.innerHTML = `
-      <div class="settings-menu-overlay" id="settings-overlay"></div>
-      <div class="settings-menu-content">
-        <div class="settings-menu-header">
-          <h3>Settings & Data Management</h3>
-          <button class="close-button" id="close-settings">✕</button>
-        </div>
-        <div class="settings-menu-body">
-          <div class="settings-section">
-            <div class="settings-section-title">Chat Management</div>
-            <button class="settings-option" id="new-chat">
-              <span class="option-icon">💬</span>
-              <span class="option-text">New Chat</span>
-            </button>
-            <button class="settings-option" id="clear-history">
-              <span class="option-icon">🗑️</span>
-              <span class="option-text">Clear Chat History</span>
-            </button>
-          </div>
-          
-          <div class="settings-section">
-            <div class="settings-section-title">Configuration</div>
-            <button class="settings-option" id="go-to-config">
-              <span class="option-icon">⚙️</span>
-              <span class="option-text">Edit Configuration</span>
-            </button>
-            <button class="settings-option" id="reset-config">
-              <span class="option-icon">🔄</span>
-              <span class="option-text">Reset Configuration</span>
-            </button>
-          </div>
-          
-          <div class="settings-section">
-            <div class="settings-section-title">Data Management</div>
-            <button class="settings-option" id="export-data">
-              <span class="option-icon">📤</span>
-              <span class="option-text">Export Data</span>
-            </button>
-            <button class="settings-option" id="import-data">
-              <span class="option-icon">📥</span>
-              <span class="option-text">Import Data</span>
-            </button>
-            <button class="settings-option danger" id="reset-all">
-              <span class="option-icon">⚠️</span>
-              <span class="option-text">Reset All Data</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
 
-    document.body.appendChild(settingsMenu);
-
-    // Setup event listeners for settings menu
-    this.setupSettingsMenuListeners(settingsMenu);
-  }
-
-  /**
-   * Setup event listeners for settings menu
-   */
-  private setupSettingsMenuListeners(menu: HTMLElement): void {
-    const overlay = menu.querySelector('#settings-overlay');
-    const closeButton = menu.querySelector('#close-settings');
-    const newChatButton = menu.querySelector('#new-chat');
-    const clearHistoryButton = menu.querySelector('#clear-history');
-    const configButton = menu.querySelector('#go-to-config');
-    const resetConfigButton = menu.querySelector('#reset-config');
-    const exportDataButton = menu.querySelector('#export-data');
-    const importDataButton = menu.querySelector('#import-data');
-    const resetAllButton = menu.querySelector('#reset-all');
-
-    const closeMenu = () => {
-      document.body.removeChild(menu);
-    };
-
-    // Close menu when clicking overlay or close button
-    overlay?.addEventListener('click', closeMenu);
-    closeButton?.addEventListener('click', closeMenu);
-
-    // Chat Management
-    newChatButton?.addEventListener('click', async () => {
-      await this.startNewChat();
-      closeMenu();
-    });
-
-    clearHistoryButton?.addEventListener('click', async () => {
-      if (await this.confirmAction('Clear Chat History', 'Are you sure you want to clear all chat history? This action cannot be undone.')) {
-        await this.clearChatHistory();
-      }
-      closeMenu();
-    });
-
-    // Configuration Management
-    configButton?.addEventListener('click', async () => {
-      await this.stateManager.setCurrentView('configuration');
-      window.dispatchEvent(new CustomEvent('viewChange', { 
-        detail: { view: 'configuration' } 
-      }));
-      closeMenu();
-    });
-
-    resetConfigButton?.addEventListener('click', async () => {
-      if (await this.confirmAction('Reset Configuration', 'Are you sure you want to reset your FastGPT configuration? You will need to reconfigure your connection settings.')) {
-        await this.resetConfiguration();
-      }
-      closeMenu();
-    });
-
-    // Data Management
-    exportDataButton?.addEventListener('click', async () => {
-      await this.exportData();
-      closeMenu();
-    });
-
-    importDataButton?.addEventListener('click', async () => {
-      await this.importData();
-      closeMenu();
-    });
-
-    resetAllButton?.addEventListener('click', async () => {
-      if (await this.confirmAction('Reset All Data', 'Are you sure you want to reset ALL extension data? This will clear your configuration, chat history, and all settings. This action cannot be undone.', true)) {
-        await this.resetAllData();
-      }
-      closeMenu();
-    });
-  }
 
 
 
@@ -805,56 +618,9 @@ export class ChatComponent {
     }
   }
 
-  /**
-   * Start a new chat session
-   */
-  private async startNewChat(): Promise<void> {
-    try {
-      // Create a new chat session
-      await this.createNewChatSession();
-      
-      // Re-render the messages to show the empty chat
-      this.renderMessages();
-      
-      console.log('Started new chat session');
-    } catch (error) {
-      console.error('Error starting new chat:', error);
-      await this.showErrorMessage('Failed to start new chat. Please try again.');
-    }
-  }
 
-  /**
-   * Clear all chat history
-   */
-  private async clearChatHistory(): Promise<void> {
-    try {
-      // Get all chat sessions
-      const sessionsResult = await this.storageManager.getChatSessions();
-      
-      if (sessionsResult.success && sessionsResult.data) {
-        const sessionIds = Object.keys(sessionsResult.data);
-        
-        // Remove all chat sessions from storage
-        if (sessionIds.length > 0) {
-          const removeResult = await this.storageManager.removeData(['chatSessions']);
-          if (!removeResult.success) {
-            throw new Error(removeResult.error || 'Failed to clear chat history');
-          }
-        }
-      }
-      
-      // Create a new empty session
-      await this.createNewChatSession();
-      
-      // Re-render the messages to show the empty chat
-      this.renderMessages();
-      
-      console.log('Chat history cleared successfully');
-    } catch (error) {
-      console.error('Error clearing chat history:', error);
-      await this.showErrorMessage('Failed to clear chat history. Please try again.');
-    }
-  }
+
+
 
   /**
    * Get all chat sessions for management
@@ -934,232 +700,13 @@ export class ChatComponent {
     }
   }
 
-  /**
-   * Show confirmation dialog for destructive actions
-   */
-  private async confirmAction(title: string, message: string, isDangerous: boolean = false): Promise<boolean> {
-    return new Promise((resolve) => {
-      const confirmDialog = document.createElement('div');
-      confirmDialog.className = 'confirm-dialog';
-      confirmDialog.innerHTML = `
-        <div class="confirm-dialog-overlay"></div>
-        <div class="confirm-dialog-content">
-          <div class="confirm-dialog-header ${isDangerous ? 'danger' : ''}">
-            <h3>${title}</h3>
-          </div>
-          <div class="confirm-dialog-body">
-            <p>${message}</p>
-          </div>
-          <div class="confirm-dialog-actions">
-            <button class="nav-button secondary" id="confirm-cancel">Cancel</button>
-            <button class="nav-button ${isDangerous ? 'danger' : 'primary'}" id="confirm-ok">
-              ${isDangerous ? 'Delete' : 'Confirm'}
-            </button>
-          </div>
-        </div>
-      `;
 
-      document.body.appendChild(confirmDialog);
 
-      const cancelButton = confirmDialog.querySelector('#confirm-cancel') as HTMLButtonElement;
-      const okButton = confirmDialog.querySelector('#confirm-ok') as HTMLButtonElement;
-      const overlay = confirmDialog.querySelector('.confirm-dialog-overlay') as HTMLElement;
 
-      const cleanup = () => {
-        document.body.removeChild(confirmDialog);
-      };
 
-      cancelButton.addEventListener('click', () => {
-        cleanup();
-        resolve(false);
-      });
 
-      okButton.addEventListener('click', () => {
-        cleanup();
-        resolve(true);
-      });
 
-      overlay.addEventListener('click', () => {
-        cleanup();
-        resolve(false);
-      });
-    });
-  }
 
-  /**
-   * Reset configuration and return to configuration view
-   */
-  private async resetConfiguration(): Promise<void> {
-    try {
-      const result = await this.stateManager.resetConfiguration();
-      if (result.success) {
-        // Navigate to configuration view
-        await this.stateManager.setCurrentView('configuration');
-        window.dispatchEvent(new CustomEvent('viewChange'));
-      } else {
-        await this.showErrorMessage('Failed to reset configuration. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error resetting configuration:', error);
-      await this.showErrorMessage('An error occurred while resetting configuration.');
-    }
-  }
 
-  /**
-   * Export all extension data
-   */
-  private async exportData(): Promise<void> {
-    try {
-      // Get all data from storage
-      const [chatSessions, extensionState] = await Promise.all([
-        this.storageManager.getChatSessions(),
-        this.stateManager.getCurrentState()
-      ]);
 
-      const exportData = {
-        version: '1.0.0',
-        exportDate: new Date().toISOString(),
-        chatSessions: chatSessions.success ? chatSessions.data : {},
-        extensionState: extensionState,
-        metadata: {
-          totalSessions: chatSessions.success && chatSessions.data ? Object.keys(chatSessions.data).length : 0,
-          totalMessages: this.getTotalMessageCount(chatSessions.success ? chatSessions.data : {})
-        }
-      };
-
-      // Create and download the export file
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `fastgpt-extension-data-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      console.log('Data exported successfully');
-    } catch (error) {
-      console.error('Error exporting data:', error);
-      await this.showErrorMessage('Failed to export data. Please try again.');
-    }
-  }
-
-  /**
-   * Import extension data from file
-   */
-  private async importData(): Promise<void> {
-    try {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      
-      input.onchange = async (event) => {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (!file) return;
-
-        try {
-          const text = await file.text();
-          const importData = JSON.parse(text);
-
-          // Validate import data structure
-          if (!this.validateImportData(importData)) {
-            await this.showErrorMessage('Invalid import file format. Please select a valid FastGPT extension export file.');
-            return;
-          }
-
-          // Confirm import action
-          const confirmed = await this.confirmAction(
-            'Import Data',
-            `This will replace all current data with the imported data. The import contains ${importData.metadata?.totalSessions || 0} chat sessions and ${importData.metadata?.totalMessages || 0} messages. Continue?`,
-            true
-          );
-
-          if (!confirmed) return;
-
-          // Import chat sessions
-          if (importData.chatSessions) {
-            const result = await this.storageManager.setChatSessions(importData.chatSessions);
-            if (!result.success) {
-              throw new Error('Failed to import chat sessions');
-            }
-          }
-
-          // Reload current session
-          await this.loadOrCreateChatSession();
-          this.renderMessages();
-
-          console.log('Data imported successfully');
-        } catch (error) {
-          console.error('Error importing data:', error);
-          await this.showErrorMessage('Failed to import data. Please check the file format and try again.');
-        }
-      };
-
-      input.click();
-    } catch (error) {
-      console.error('Error setting up import:', error);
-      await this.showErrorMessage('Failed to set up data import. Please try again.');
-    }
-  }
-
-  /**
-   * Reset all extension data
-   */
-  private async resetAllData(): Promise<void> {
-    try {
-      const result = await this.stateManager.resetAllState();
-      if (result.success) {
-        // Navigate back to onboarding
-        await this.stateManager.setCurrentView('onboarding');
-        window.dispatchEvent(new CustomEvent('viewChange'));
-      } else {
-        await this.showErrorMessage('Failed to reset all data. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error resetting all data:', error);
-      await this.showErrorMessage('An error occurred while resetting all data.');
-    }
-  }
-
-  /**
-   * Validate import data structure
-   */
-  private validateImportData(data: any): boolean {
-    try {
-      // Check required fields
-      if (!data || typeof data !== 'object') return false;
-      if (!data.version || !data.exportDate) return false;
-      
-      // Validate chat sessions structure if present
-      if (data.chatSessions && typeof data.chatSessions === 'object') {
-        for (const [sessionId, session] of Object.entries(data.chatSessions)) {
-          const sessionData = session as any;
-          if (!sessionData.messages || !Array.isArray(sessionData.messages)) return false;
-          if (!sessionData.createdAt || !sessionData.updatedAt) return false;
-        }
-      }
-
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  /**
-   * Get total message count from chat sessions data
-   */
-  private getTotalMessageCount(chatSessions: any): number {
-    let total = 0;
-    if (chatSessions && typeof chatSessions === 'object') {
-      for (const session of Object.values(chatSessions)) {
-        const sessionData = session as any;
-        if (sessionData.messages && Array.isArray(sessionData.messages)) {
-          total += sessionData.messages.length;
-        }
-      }
-    }
-    return total;
-  }
 }
