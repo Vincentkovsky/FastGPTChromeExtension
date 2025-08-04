@@ -8,7 +8,7 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://*/*"
+    "https://cloud.fastgpt.cn"
   ],
   "background": {
     "service_worker": "background.js",
