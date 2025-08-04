@@ -26,12 +26,10 @@ export class SettingsComponent {
     return `
       <div class="settings-container view-container">
         <div class="settings-header">
-          <div class="header-content">
-            <button class="back-button" id="back-to-chat" title="Back to Chat">
-              ← Back to Chat
-            </button>
-            <h1 class="settings-title">Settings & Data Management</h1>
-          </div>
+          <h1 class="settings-title">Settings & Data Management</h1>
+          <button class="close-button" id="back-to-chat" title="Back to Chat">
+            ✕
+          </button>
         </div>
         
         <div class="settings-content">

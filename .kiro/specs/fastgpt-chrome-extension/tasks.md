@@ -155,7 +155,7 @@
     - Create automated build scripts and version management
     - _Requirements: 4.6_
 
-  - [ ] 10.2 Package extension for Chrome Web Store distribution
+  - [x] 10.2 Package extension for Chrome Web Store distribution
     - Generate final extension package with proper manifest
     - Create extension icons and promotional assets
     - Prepare extension description and screenshots for store listing
@@ -163,14 +163,14 @@
 
 - [ ] 11. Write comprehensive tests
 
-  - [ ] 11.1 Create unit tests for core functionality
+  - [x] 11.1 Create unit tests for core functionality
 
     - Write tests for storage management and state system
     - Test API client functionality with mocked responses
     - Create tests for configuration validation and error handling
     - _Requirements: 2.5, 2.7, 3.5_
 
-  - [ ] 11.2 Implement integration tests for user flows
+  - [x] 11.2 Implement integration tests for user flows
     - Test complete onboarding to chat flow
     - Verify configuration persistence and restoration
     - Test API integration with FastGPT endpoints

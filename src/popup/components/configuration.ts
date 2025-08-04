@@ -45,27 +45,8 @@ export class ConfigurationComponent {
   private getConfigurationHTML(): string {
     return `
       <div class="configuration-container view-container">
-        <div class="navigation-header">
-          <h1 class="navigation-title">Configure FastGPT Connection</h1>
-          <div class="navigation-controls">
-            <button class="nav-control-button" id="back-to-onboarding-nav">
-              ← Setup
-            </button>
-            <div class="view-state-indicator configuration">Config</div>
-          </div>
-        </div>
-        
-        <div class="breadcrumb-nav">
-          <div class="breadcrumb-item">
-            <span class="breadcrumb-link" id="breadcrumb-onboarding">Setup</span>
-            <span class="breadcrumb-separator">›</span>
-          </div>
-          <div class="breadcrumb-item">
-            <span class="breadcrumb-current">Configuration</span>
-          </div>
-        </div>
-        
         <div class="configuration-header">
+          <h1 class="configuration-title">Configure FastGPT Connection</h1>
           <p class="configuration-subtitle">
             Enter your FastGPT connection details to start chatting with your knowledge base.
           </p>
@@ -132,12 +113,6 @@ export class ConfigurationComponent {
             </button>
           </div>
         </form>
-
-        <div class="configuration-footer">
-          <button id="back-to-onboarding" class="nav-button secondary">
-            ← Back to Setup
-          </button>
-        </div>
       </div>
     `;
   }
@@ -154,7 +129,6 @@ export class ConfigurationComponent {
     const apiKeyInput = this.container.querySelector('#apiKey') as HTMLInputElement;
     const testButton = this.container.querySelector('#test-connection') as HTMLButtonElement;
     const saveButton = this.container.querySelector('#save-configuration') as HTMLButtonElement;
-    const backButton = this.container.querySelector('#back-to-onboarding') as HTMLButtonElement;
 
     // Handle input changes
     [baseUrlInput, appIdInput, apiKeyInput].forEach(input => {
@@ -177,31 +151,6 @@ export class ConfigurationComponent {
     if (testButton) {
       testButton.addEventListener('click', () => {
         this.handleTestConnection();
-      });
-    }
-
-    // Back button
-    if (backButton) {
-      backButton.addEventListener('click', async () => {
-        await this.stateManager.resetOnboarding();
-      });
-    }
-
-    // Navigation controls
-    const backToOnboardingNav = this.container.querySelector('#back-to-onboarding-nav') as HTMLButtonElement;
-    const breadcrumbOnboarding = this.container.querySelector('#breadcrumb-onboarding') as HTMLElement;
-
-    if (backToOnboardingNav) {
-      backToOnboardingNav.addEventListener('click', async () => {
-        await this.stateManager.setCurrentView('onboarding');
-        window.dispatchEvent(new CustomEvent('viewChange'));
-      });
-    }
-
-    if (breadcrumbOnboarding) {
-      breadcrumbOnboarding.addEventListener('click', async () => {
-        await this.stateManager.setCurrentView('onboarding');
-        window.dispatchEvent(new CustomEvent('viewChange'));
       });
     }
   }
@@ -227,7 +176,13 @@ export class ConfigurationComponent {
       
       if (result.success) {
         // Configuration saved successfully
-        this.showSuccessMessage('Configuration saved successfully!');
+        this.showSuccessMessage('Configuration saved successfully! Redirecting to chat...');
+        
+        // Auto-redirect to chat after a short delay
+        setTimeout(async () => {
+          await this.stateManager.setCurrentView('chat');
+          window.dispatchEvent(new CustomEvent('viewChange'));
+        }, 1500);
       } else {
         this.showErrorMessage(result.error || 'Failed to save configuration');
       }
