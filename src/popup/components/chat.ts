@@ -587,34 +587,92 @@ export class ChatComponent {
   }
 
   /**
-   * Format message content (handle line breaks, etc.)
+   * Format message content with Markdown support
    */
   private formatMessageContent(content: string): string {
     // Handle undefined or null content
     if (!content) {
       return '';
     }
-    // Convert line breaks to HTML
-    return content.replace(/\n/g, '<br>');
+
+    // Basic Markdown parsing
+    let formatted = content;
+
+    // Code blocks (```code```)
+    formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+    
+    // Inline code (`code`)
+    formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Bold (**text** or __text__)
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/__(.*?)__/g, '<strong>$1</strong>');
+    
+    // Italic (*text* or _text_)
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
+    
+    // Strikethrough (~~text~~)
+    formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
+    
+    // Links [text](url)
+    formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    
+    // Headers (# ## ###)
+    formatted = formatted.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+    formatted = formatted.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+    formatted = formatted.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+    
+    // Lists
+    // Unordered lists (- or *)
+    formatted = formatted.replace(/^[\s]*[-*]\s+(.*)$/gm, '<li>$1</li>');
+    formatted = formatted.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    
+    // Ordered lists (1. 2. 3.)
+    formatted = formatted.replace(/^[\s]*\d+\.\s+(.*)$/gm, '<li>$1</li>');
+    
+    // Blockquotes (> text)
+    formatted = formatted.replace(/^>\s+(.*)$/gm, '<blockquote>$1</blockquote>');
+    
+    // Horizontal rules (--- or ***)
+    formatted = formatted.replace(/^(---|\*\*\*)$/gm, '<hr>');
+    
+    // Convert line breaks to HTML (do this last to preserve other formatting)
+    formatted = formatted.replace(/\n/g, '<br>');
+    
+    return formatted;
   }
 
   /**
    * Format timestamp for display
    */
-  private formatTimestamp(timestamp: Date): string {
-    const now = new Date();
-    const diff = now.getTime() - timestamp.getTime();
-    
-    if (diff < 60000) { // Less than 1 minute
-      return 'Just now';
-    } else if (diff < 3600000) { // Less than 1 hour
-      const minutes = Math.floor(diff / 60000);
-      return `${minutes}m ago`;
-    } else if (diff < 86400000) { // Less than 1 day
-      const hours = Math.floor(diff / 3600000);
-      return `${hours}h ago`;
-    } else {
-      return timestamp.toLocaleDateString();
+  private formatTimestamp(timestamp: Date | string): string {
+    try {
+      // Ensure we have a valid Date object
+      const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'Now';
+      }
+      
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      
+      if (diff < 60000) { // Less than 1 minute
+        return 'Just now';
+      } else if (diff < 3600000) { // Less than 1 hour
+        const minutes = Math.floor(diff / 60000);
+        return `${minutes}m ago`;
+      } else if (diff < 86400000) { // Less than 1 day
+        const hours = Math.floor(diff / 3600000);
+        return `${hours}h ago`;
+      } else {
+        return date.toLocaleDateString();
+      }
+    } catch (error) {
+      console.error('Error formatting timestamp:', error);
+      return 'Now';
     }
   }
 

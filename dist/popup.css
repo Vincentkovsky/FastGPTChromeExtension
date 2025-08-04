@@ -713,6 +713,7 @@ body {
     font-size: 14px;
     line-height: 1.4;
     word-wrap: break-word;
+    text-align: left;
 }
 
 .message-timestamp {
@@ -2188,4 +2189,235 @@ gs Page Styles - Modern & Clean */
 .setting-action:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
+}
+/*
+ Markdown Content Styles */
+.message-text h1,
+.message-text h2,
+.message-text h3 {
+    margin: 12px 0 8px 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.message-text h1 {
+    font-size: 18px;
+    color: #1a1a1a;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 4px;
+}
+
+.message-text h2 {
+    font-size: 16px;
+    color: #1a1a1a;
+}
+
+.message-text h3 {
+    font-size: 14px;
+    color: #374151;
+}
+
+.message-text code {
+    background-color: #f1f5f9;
+    color: #e11d48;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+}
+
+.message-text pre {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 8px 0;
+    overflow-x: auto;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.message-text pre code {
+    background: none;
+    color: #334155;
+    padding: 0;
+    border-radius: 0;
+}
+
+.message-text strong {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.message-text em {
+    font-style: italic;
+    color: #4b5563;
+}
+
+.message-text del {
+    text-decoration: line-through;
+    color: #6b7280;
+}
+
+.message-text ul,
+.message-text ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.message-text li {
+    margin: 4px 0;
+    line-height: 1.4;
+}
+
+.message-text ul li {
+    list-style-type: disc;
+}
+
+.message-text ol li {
+    list-style-type: decimal;
+}
+
+.message-text blockquote {
+    border-left: 4px solid #3b82f6;
+    background-color: #f0f9ff;
+    margin: 8px 0;
+    padding: 8px 12px;
+    font-style: italic;
+    color: #1e40af;
+}
+
+.message-text hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 16px 0;
+}
+
+.message-text a {
+    color: #3b82f6;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.message-text a:hover {
+    color: #2563eb;
+}
+
+/* User message markdown styles (white text) */
+.message-user .message-text h1,
+.message-user .message-text h2,
+.message-user .message-text h3,
+.message-user .message-text strong {
+    color: #ffffff;
+}
+
+.message-user .message-text h1 {
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.message-user .message-text code {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.message-user .message-text pre {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.message-user .message-text pre code {
+    color: #ffffff;
+}
+
+.message-user .message-text blockquote {
+    border-left-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.message-user .message-text hr {
+    border-top-color: rgba(255, 255, 255, 0.3);
+}
+
+.message-user .message-text a {
+    color: #bfdbfe;
+}
+
+.message-user .message-text a:hover {
+    color: #dbeafe;
+}
+
+/* Dark mode markdown support */
+@media (prefers-color-scheme: dark) {
+    .message-text h1,
+    .message-text h2,
+    .message-text strong {
+        color: #f9fafb;
+    }
+    
+    .message-text h3 {
+        color: #d1d5db;
+    }
+    
+    .message-text h1 {
+        border-bottom-color: #374151;
+    }
+    
+    .message-text code {
+        background-color: #374151;
+        color: #fbbf24;
+    }
+    
+    .message-text pre {
+        background-color: #1f2937;
+        border-color: #374151;
+    }
+    
+    .message-text pre code {
+        color: #d1d5db;
+    }
+    
+    .message-text blockquote {
+        border-left-color: #60a5fa;
+        background-color: #1e3a8a;
+        color: #93c5fd;
+    }
+    
+    .message-text hr {
+        border-top-color: #374151;
+    }
+    
+    .message-text a {
+        color: #60a5fa;
+    }
+    
+    .message-text a:hover {
+        color: #93c5fd;
+    }
+}
+
+/* High contrast mode markdown support */
+@media (prefers-contrast: high) {
+    .message-text code {
+        background-color: #000000;
+        color: #ffffff;
+        border: 1px solid #ffffff;
+    }
+    
+    .message-text pre {
+        background-color: #000000;
+        border: 2px solid #ffffff;
+    }
+    
+    .message-text pre code {
+        color: #ffffff;
+    }
+    
+    .message-text blockquote {
+        border-left-color: #000000;
+        background-color: #ffffff;
+        color: #000000;
+        border: 1px solid #000000;
+    }
 }

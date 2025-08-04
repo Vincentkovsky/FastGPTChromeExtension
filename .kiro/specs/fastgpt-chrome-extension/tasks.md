@@ -118,7 +118,7 @@
 
 - [ ] 8. Implement responsive design and accessibility
 
-  - [ ] 8.1 Create responsive layout for different popup sizes
+  - [x] 8.1 Create responsive layout for different popup sizes
 
     - Implement adaptive CSS for various screen sizes
     - Ensure proper scaling of typography and interface elements
