@@ -24,7 +24,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 460px;
+    min-height: 500px;
 }
 
 .onboarding-header {
@@ -151,7 +151,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 24px;
+    padding: 24px 16px 16px 16px;
     border-top: 1px solid #e5e7eb;
     margin-top: auto;
 }

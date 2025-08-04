@@ -96,20 +96,26 @@ export class ChatComponent {
    * Setup event listeners for the chat interface
    */
   private setupEventListeners(container: HTMLElement): void {
-    const messageInput = container.querySelector('#message-input') as HTMLTextAreaElement;
-    const sendButton = container.querySelector('#send-button') as HTMLButtonElement;
-    const settingsButton = container.querySelector('#settings-button') as HTMLButtonElement;
+    const messageInput = container.querySelector(
+      "#message-input"
+    ) as HTMLTextAreaElement;
+    const sendButton = container.querySelector(
+      "#send-button"
+    ) as HTMLButtonElement;
+    const settingsButton = container.querySelector(
+      "#settings-button"
+    ) as HTMLButtonElement;
 
     if (messageInput) {
       // Auto-resize textarea
-      messageInput.addEventListener('input', () => {
+      messageInput.addEventListener("input", () => {
         this.autoResizeTextarea(messageInput);
         this.updateSendButtonState(messageInput, sendButton);
       });
 
       // Handle Enter key (send message) and Shift+Enter (new line)
-      messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+      messageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           this.handleSendMessage(messageInput);
         }
@@ -120,13 +126,13 @@ export class ChatComponent {
     }
 
     if (sendButton) {
-      sendButton.addEventListener('click', () => {
+      sendButton.addEventListener("click", () => {
         this.handleSendMessage(messageInput);
       });
     }
 
     if (settingsButton) {
-      settingsButton.addEventListener('click', async () => {
+      settingsButton.addEventListener("click", async () => {
         await this.handleSettingsClick();
       });
     }
@@ -135,27 +141,28 @@ export class ChatComponent {
     this.updateMessageCount();
   }
 
-
-
   /**
    * Auto-resize textarea based on content
    */
   private autoResizeTextarea(textarea: HTMLTextAreaElement): void {
-    textarea.style.height = 'auto';
+    textarea.style.height = "auto";
     const maxHeight = 120; // Maximum height in pixels
     const newHeight = Math.min(textarea.scrollHeight, maxHeight);
-    textarea.style.height = newHeight + 'px';
+    textarea.style.height = newHeight + "px";
   }
 
   /**
    * Update send button state based on input content
    */
-  private updateSendButtonState(input: HTMLTextAreaElement, button: HTMLButtonElement): void {
+  private updateSendButtonState(
+    input: HTMLTextAreaElement,
+    button: HTMLButtonElement
+  ): void {
     const hasContent = input.value.trim().length > 0;
     const canSend = hasContent && !this.isLoading && !this.isStreaming;
-    
+
     button.disabled = !canSend;
-    button.classList.toggle('active', canSend);
+    button.classList.toggle("active", canSend);
   }
 
   /**
@@ -168,35 +175,37 @@ export class ChatComponent {
     }
 
     // Clear input and reset height
-    input.value = '';
-    input.style.height = 'auto';
+    input.value = "";
+    input.style.height = "auto";
 
     try {
       // Add user message to chat
-      const userMessage = this.createMessage('user', message);
+      const userMessage = this.createMessage("user", message);
       await this.addMessageToSession(userMessage);
       this.renderMessages();
 
       // Create assistant message for streaming
-      const assistantMessage = this.createMessage('assistant', '');
+      const assistantMessage = this.createMessage("assistant", "");
       await this.addMessageToSession(assistantMessage);
-      
+
       // Render messages to show the empty assistant message
       this.renderMessages();
-      
+
       // Start streaming immediately
       this.setStreamingState(true);
 
       // Stream message from FastGPT
-      console.log('Starting stream for message:', message);
-      console.log('Assistant message ID:', assistantMessage.id);
+      console.log("Starting stream for message:", message);
+      console.log("Assistant message ID:", assistantMessage.id);
       await this.streamMessageResponse(assistantMessage, message);
-
     } catch (error) {
-      console.error('Error sending message:', error);
-      await this.showErrorMessage('Failed to send message. Please try again.');
+      console.error("Error sending message:", error);
+      await this.showErrorMessage("Failed to send message. Please try again.");
     } finally {
-      this.updateSendButtonState(input, document.querySelector('#send-button') as HTMLButtonElement);
+      this.updateSendButtonState(
+        input,
+        document.querySelector("#send-button") as HTMLButtonElement
+      );
     }
   }
 
@@ -205,21 +214,21 @@ export class ChatComponent {
    */
   private async handleSettingsClick(): Promise<void> {
     // Navigate to settings page
-    await this.stateManager.setCurrentView('settings');
-    window.dispatchEvent(new CustomEvent('viewChange'));
+    await this.stateManager.setCurrentView("settings");
+    window.dispatchEvent(new CustomEvent("viewChange"));
   }
-
-
-
-
 
   /**
    * Set streaming state for the interface
    */
   private setStreamingState(streaming: boolean): void {
     this.isStreaming = streaming;
-    const messageInput = document.querySelector('#message-input') as HTMLTextAreaElement;
-    const sendButton = document.querySelector('#send-button') as HTMLButtonElement;
+    const messageInput = document.querySelector(
+      "#message-input"
+    ) as HTMLTextAreaElement;
+    const sendButton = document.querySelector(
+      "#send-button"
+    ) as HTMLButtonElement;
 
     if (messageInput) {
       messageInput.disabled = streaming;
@@ -228,155 +237,198 @@ export class ChatComponent {
     if (sendButton) {
       this.updateSendButtonState(messageInput, sendButton);
     }
-
-
   }
 
   /**
    * Show or hide typing indicator
    */
   private showTypingIndicator(show: boolean): void {
-    const typingIndicator = document.querySelector('#typing-indicator') as HTMLElement;
+    const typingIndicator = document.querySelector(
+      "#typing-indicator"
+    ) as HTMLElement;
     if (typingIndicator) {
-      typingIndicator.style.display = show ? 'flex' : 'none';
+      typingIndicator.style.display = show ? "flex" : "none";
     }
   }
 
   /**
    * Stream message response from FastGPT and update UI in real-time
    */
-  private async streamMessageResponse(assistantMessage: ChatMessage, userMessage: string): Promise<void> {
-    console.log('streamMessageResponse called with:', { assistantMessage, userMessage });
-    
+  private async streamMessageResponse(
+    assistantMessage: ChatMessage,
+    userMessage: string
+  ): Promise<void> {
+    console.log("streamMessageResponse called with:", {
+      assistantMessage,
+      userMessage,
+    });
+
     if (!this.fastgptClient || !this.currentSession) {
-      console.error('Missing dependencies:', { 
-        fastgptClient: !!this.fastgptClient, 
-        currentSession: !!this.currentSession 
+      console.error("Missing dependencies:", {
+        fastgptClient: !!this.fastgptClient,
+        currentSession: !!this.currentSession,
       });
-      throw new Error('FastGPT client or current session not available');
+      throw new Error("FastGPT client or current session not available");
     }
 
-    let accumulatedContent = '';
-    
+    let accumulatedContent = "";
+
     try {
       // Get the message element for real-time updates
-      const messageElement = document.querySelector(`[data-message-id="${assistantMessage.id}"]`);
-      console.log('Found message element:', !!messageElement);
-      
-      const messageContentElement = messageElement?.querySelector('.message-content') as HTMLElement;
-      const messageTextElement = messageElement?.querySelector('.message-text') as HTMLElement;
-      
-      console.log('Found sub-elements:', { 
-        messageContentElement: !!messageContentElement, 
-        messageTextElement: !!messageTextElement 
+      const messageElement = document.querySelector(
+        `[data-message-id="${assistantMessage.id}"]`
+      );
+      console.log("Found message element:", !!messageElement);
+
+      const messageContentElement = messageElement?.querySelector(
+        ".message-content"
+      ) as HTMLElement;
+      const messageTextElement = messageElement?.querySelector(
+        ".message-text"
+      ) as HTMLElement;
+
+      console.log("Found sub-elements:", {
+        messageContentElement: !!messageContentElement,
+        messageTextElement: !!messageTextElement,
       });
-      
+
       if (!messageTextElement || !messageContentElement) {
-        console.error('Message elements not found for ID:', assistantMessage.id);
-        throw new Error('Message element not found for streaming updates');
+        console.error(
+          "Message elements not found for ID:",
+          assistantMessage.id
+        );
+        throw new Error("Message element not found for streaming updates");
       }
 
       // Add streaming visual indicators
-      messageElement?.classList.add('streaming');
-      messageContentElement.classList.add('streaming');
+      messageElement?.classList.add("streaming");
+      messageContentElement.classList.add("streaming");
 
       // Start streaming
-      const streamGenerator = this.fastgptClient.sendMessageStream(userMessage, this.currentSession.id);
-      
+      const streamGenerator = this.fastgptClient.sendMessageStream(
+        userMessage,
+        this.currentSession.id
+      );
+
       let chunkCount = 0;
       for await (const chunk of streamGenerator) {
         // Check if streaming was interrupted
         if (!this.isStreaming) {
-          console.log('Streaming was interrupted by user');
+          console.log("Streaming was interrupted by user");
           break;
         }
 
         // Accumulate content
         accumulatedContent += chunk;
         chunkCount++;
-        
+
         // Update the message content in real-time
         assistantMessage.content = accumulatedContent;
-        messageTextElement.innerHTML = this.formatMessageContent(accumulatedContent);
-        
+        messageTextElement.innerHTML =
+          this.formatMessageContent(accumulatedContent);
+
         // Auto-scroll to bottom to follow the streaming content
         this.scrollToBottom();
-        
+
         // Add a small delay to make streaming visible and prevent UI blocking
-        if (chunkCount % 5 === 0) { // Only delay every 5 chunks for better performance
+        if (chunkCount % 5 === 0) {
+          // Only delay every 5 chunks for better performance
           await this.sleep(20);
         }
       }
 
       // Remove streaming visual indicators
-      messageElement?.classList.remove('streaming');
-      messageContentElement.classList.remove('streaming');
+      messageElement?.classList.remove("streaming");
+      messageContentElement.classList.remove("streaming");
 
       // Final update to ensure message is complete
       assistantMessage.content = accumulatedContent;
       assistantMessage.timestamp = new Date();
-      
+
       // Final render to ensure proper formatting
-      messageTextElement.innerHTML = this.formatMessageContent(accumulatedContent);
-      
+      messageTextElement.innerHTML =
+        this.formatMessageContent(accumulatedContent);
+
       // Save the completed message to storage
       await this.saveChatSession();
-      
+
       console.log(`Streaming completed successfully with ${chunkCount} chunks`);
 
       // Remove streaming visual indicators
-      messageElement?.classList.remove('streaming');
-      messageContentElement.classList.remove('streaming');
+      messageElement?.classList.remove("streaming");
+      messageContentElement.classList.remove("streaming");
 
       // Final update to ensure message is complete
       assistantMessage.content = accumulatedContent;
       assistantMessage.timestamp = new Date();
-      
+
       // Final render to ensure proper formatting
-      messageTextElement.innerHTML = this.formatMessageContent(accumulatedContent);
-      
+      messageTextElement.innerHTML =
+        this.formatMessageContent(accumulatedContent);
+
       // Save the completed message to storage
       await this.saveChatSession();
-      
+
       console.log(`Streaming completed successfully with ${chunkCount} chunks`);
-      
     } catch (error) {
-      console.error('Error during streaming:', error);
-      
+      console.error("Error during streaming:", error);
+
       // Remove streaming visual indicators on error
-      const messageElement = document.querySelector(`[data-message-id="${assistantMessage.id}"]`);
-      const messageContentElement = messageElement?.querySelector('.message-content') as HTMLElement;
-      messageElement?.classList.remove('streaming');
-      messageContentElement?.classList.remove('streaming');
-      
+      const messageElement = document.querySelector(
+        `[data-message-id="${assistantMessage.id}"]`
+      );
+      const messageContentElement = messageElement?.querySelector(
+        ".message-content"
+      ) as HTMLElement;
+      messageElement?.classList.remove("streaming");
+      messageContentElement?.classList.remove("streaming");
+
       // Handle streaming errors gracefully
       if (error instanceof Error) {
-        if (error.message.includes('aborted') || error.message.includes('cancelled')) {
+        if (
+          error.message.includes("aborted") ||
+          error.message.includes("cancelled")
+        ) {
           // User cancelled or connection was aborted
-          assistantMessage.content = accumulatedContent + '\n\n_[Response was interrupted]_';
-        } else if (error.message.includes('network') || error.message.includes('connection')) {
+          assistantMessage.content =
+            accumulatedContent + "\n\n_[Response was interrupted]_";
+        } else if (
+          error.message.includes("network") ||
+          error.message.includes("connection")
+        ) {
           // Network error during streaming
-          assistantMessage.content = accumulatedContent + '\n\n❌ _Connection lost during response. Please try again._';
-        } else if (error.message.includes('timeout')) {
+          assistantMessage.content =
+            accumulatedContent +
+            "\n\n❌ _Connection lost during response. Please try again._";
+        } else if (error.message.includes("timeout")) {
           // Timeout error
-          assistantMessage.content = accumulatedContent + '\n\n❌ _Request timed out. Please try again._';
+          assistantMessage.content =
+            accumulatedContent +
+            "\n\n❌ _Request timed out. Please try again._";
         } else {
           // Other streaming errors
-          assistantMessage.content = accumulatedContent + '\n\n❌ _An error occurred while receiving the response._';
+          assistantMessage.content =
+            accumulatedContent +
+            "\n\n❌ _An error occurred while receiving the response._";
         }
       } else {
-        assistantMessage.content = accumulatedContent + '\n\n❌ _An unexpected error occurred._';
+        assistantMessage.content =
+          accumulatedContent + "\n\n❌ _An unexpected error occurred._";
       }
-      
+
       // Update the UI with error message
-      const messageTextElement = messageElement?.querySelector('.message-text') as HTMLElement;
+      const messageTextElement = messageElement?.querySelector(
+        ".message-text"
+      ) as HTMLElement;
       if (messageTextElement) {
-        messageTextElement.innerHTML = this.formatMessageContent(assistantMessage.content);
+        messageTextElement.innerHTML = this.formatMessageContent(
+          assistantMessage.content
+        );
       }
-      
+
       // Save the message with error state
       await this.saveChatSession();
-      
+
       throw error; // Re-throw to be handled by the calling method
     } finally {
       // Always clean up streaming state
@@ -388,7 +440,9 @@ export class ChatComponent {
    * Scroll chat messages to bottom
    */
   private scrollToBottom(): void {
-    const messagesContainer = document.querySelector('#chat-messages') as HTMLElement;
+    const messagesContainer = document.querySelector(
+      "#chat-messages"
+    ) as HTMLElement;
     if (messagesContainer) {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -398,14 +452,14 @@ export class ChatComponent {
    * Sleep for specified milliseconds (for streaming delay)
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * Show error message in chat
    */
   private async showErrorMessage(message: string): Promise<void> {
-    const errorMessage = this.createMessage('assistant', `❌ ${message}`);
+    const errorMessage = this.createMessage("assistant", `❌ ${message}`);
     await this.addMessageToSession(errorMessage);
     this.renderMessages();
   }
@@ -413,12 +467,15 @@ export class ChatComponent {
   /**
    * Create a new chat message
    */
-  private createMessage(role: 'user' | 'assistant', content: string): ChatMessage {
+  private createMessage(
+    role: "user" | "assistant",
+    content: string
+  ): ChatMessage {
     return {
       id: this.generateMessageId(),
       role,
       content,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -436,12 +493,12 @@ export class ChatComponent {
     try {
       // Try to load existing chat sessions
       const sessionsResult = await this.storageManager.getChatSessions();
-      
+
       if (sessionsResult.success && sessionsResult.data) {
         // Find the most recent session
         const sessions = sessionsResult.data;
         const sessionIds = Object.keys(sessions);
-        
+
         if (sessionIds.length > 0) {
           // Get the most recently updated session
           const mostRecentSessionId = sessionIds.reduce((latest, current) => {
@@ -449,28 +506,29 @@ export class ChatComponent {
             const currentUpdated = new Date(sessions[current].updatedAt);
             return currentUpdated > latestUpdated ? current : latest;
           });
-          
+
           const sessionData = sessions[mostRecentSessionId];
           this.currentSession = {
             id: mostRecentSessionId,
             messages: sessionData.messages.map((msg: any) => ({
               ...msg,
-              timestamp: new Date(msg.timestamp)
+              timestamp: new Date(msg.timestamp),
             })),
             createdAt: new Date(sessionData.createdAt),
-            updatedAt: new Date(sessionData.updatedAt)
+            updatedAt: new Date(sessionData.updatedAt),
           };
-          
-          console.log(`Loaded existing chat session: ${mostRecentSessionId} with ${this.currentSession.messages.length} messages`);
+
+          console.log(
+            `Loaded existing chat session: ${mostRecentSessionId} with ${this.currentSession.messages.length} messages`
+          );
           return;
         }
       }
-      
+
       // No existing sessions found, create a new one
       await this.createNewChatSession();
-      
     } catch (error) {
-      console.error('Error loading chat session:', error);
+      console.error("Error loading chat session:", error);
       // Fallback to creating a new session
       await this.createNewChatSession();
     }
@@ -484,9 +542,9 @@ export class ChatComponent {
       id: this.generateSessionId(),
       messages: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     // Save the new session to storage
     await this.saveChatSession();
     console.log(`Created new chat session: ${this.currentSession.id}`);
@@ -496,7 +554,9 @@ export class ChatComponent {
    * Generate a unique session ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    return `session_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 11)}`;
   }
 
   /**
@@ -506,7 +566,7 @@ export class ChatComponent {
     if (this.currentSession) {
       this.currentSession.messages.push(message);
       this.currentSession.updatedAt = new Date();
-      
+
       // Persist the updated session to storage
       await this.saveChatSession();
     }
@@ -521,12 +581,15 @@ export class ChatComponent {
     }
 
     try {
-      const result = await this.storageManager.setChatSession(this.currentSession.id, this.currentSession);
+      const result = await this.storageManager.setChatSession(
+        this.currentSession.id,
+        this.currentSession
+      );
       if (!result.success) {
-        console.error('Failed to save chat session:', result.error);
+        console.error("Failed to save chat session:", result.error);
       }
     } catch (error) {
-      console.error('Error saving chat session:', error);
+      console.error("Error saving chat session:", error);
     }
   }
 
@@ -534,12 +597,14 @@ export class ChatComponent {
    * Render all messages in the chat
    */
   private renderMessages(): void {
-    const messagesContainer = document.querySelector('#chat-messages') as HTMLElement;
+    const messagesContainer = document.querySelector(
+      "#chat-messages"
+    ) as HTMLElement;
     if (!messagesContainer || !this.currentSession) {
       return;
     }
 
-    messagesContainer.innerHTML = '';
+    messagesContainer.innerHTML = "";
 
     if (this.currentSession.messages.length === 0) {
       // Show welcome message
@@ -554,14 +619,14 @@ export class ChatComponent {
     }
 
     // Render each message
-    this.currentSession.messages.forEach(message => {
+    this.currentSession.messages.forEach((message) => {
       const messageElement = this.createMessageElement(message);
       messagesContainer.appendChild(messageElement);
     });
 
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    
+
     // Update message count
     this.updateMessageCount();
   }
@@ -570,15 +635,17 @@ export class ChatComponent {
    * Create a DOM element for a message
    */
   private createMessageElement(message: ChatMessage): HTMLElement {
-    const messageDiv = document.createElement('div');
+    const messageDiv = document.createElement("div");
     messageDiv.className = `message message-${message.role}`;
-    messageDiv.setAttribute('data-message-id', message.id);
+    messageDiv.setAttribute("data-message-id", message.id);
 
     const timestamp = this.formatTimestamp(message.timestamp);
-    
+
     messageDiv.innerHTML = `
       <div class="message-content">
-        <div class="message-text">${this.formatMessageContent(message.content)}</div>
+        <div class="message-text">${this.formatMessageContent(
+          message.content
+        )}</div>
         <div class="message-timestamp">${timestamp}</div>
       </div>
     `;
@@ -592,54 +659,63 @@ export class ChatComponent {
   private formatMessageContent(content: string): string {
     // Handle undefined or null content
     if (!content) {
-      return '';
+      return "";
     }
 
     // Basic Markdown parsing
     let formatted = content;
 
     // Code blocks (```code```)
-    formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-    
+    formatted = formatted.replace(
+      /```([\s\S]*?)```/g,
+      "<pre><code>$1</code></pre>"
+    );
+
     // Inline code (`code`)
-    formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
-    
+    formatted = formatted.replace(/`([^`]+)`/g, "<code>$1</code>");
+
     // Bold (**text** or __text__)
-    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    formatted = formatted.replace(/__(.*?)__/g, '<strong>$1</strong>');
-    
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    formatted = formatted.replace(/__(.*?)__/g, "<strong>$1</strong>");
+
     // Italic (*text* or _text_)
-    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
-    
+    formatted = formatted.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    formatted = formatted.replace(/_(.*?)_/g, "<em>$1</em>");
+
     // Strikethrough (~~text~~)
-    formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
-    
+    formatted = formatted.replace(/~~(.*?)~~/g, "<del>$1</del>");
+
     // Links [text](url)
-    formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-    
+    formatted = formatted.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+
     // Headers (# ## ###)
-    formatted = formatted.replace(/^### (.*$)/gm, '<h3>$1</h3>');
-    formatted = formatted.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-    formatted = formatted.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-    
+    formatted = formatted.replace(/^### (.*$)/gm, "<h3>$1</h3>");
+    formatted = formatted.replace(/^## (.*$)/gm, "<h2>$1</h2>");
+    formatted = formatted.replace(/^# (.*$)/gm, "<h1>$1</h1>");
+
     // Lists
     // Unordered lists (- or *)
-    formatted = formatted.replace(/^[\s]*[-*]\s+(.*)$/gm, '<li>$1</li>');
-    formatted = formatted.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-    
+    formatted = formatted.replace(/^[\s]*[-*]\s+(.*)$/gm, "<li>$1</li>");
+    formatted = formatted.replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+
     // Ordered lists (1. 2. 3.)
-    formatted = formatted.replace(/^[\s]*\d+\.\s+(.*)$/gm, '<li>$1</li>');
-    
+    formatted = formatted.replace(/^[\s]*\d+\.\s+(.*)$/gm, "<li>$1</li>");
+
     // Blockquotes (> text)
-    formatted = formatted.replace(/^>\s+(.*)$/gm, '<blockquote>$1</blockquote>');
-    
+    formatted = formatted.replace(
+      /^>\s+(.*)$/gm,
+      "<blockquote>$1</blockquote>"
+    );
+
     // Horizontal rules (--- or ***)
-    formatted = formatted.replace(/^(---|\*\*\*)$/gm, '<hr>');
-    
+    formatted = formatted.replace(/^(---|\*\*\*)$/gm, "<hr>");
+
     // Convert line breaks to HTML (do this last to preserve other formatting)
-    formatted = formatted.replace(/\n/g, '<br>');
-    
+    formatted = formatted.replace(/\n/g, "<br>");
+
     return formatted;
   }
 
@@ -650,65 +726,68 @@ export class ChatComponent {
     try {
       // Ensure we have a valid Date object
       const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
-      
+
       // Check if the date is valid
       if (isNaN(date.getTime())) {
-        return 'Now';
+        return "Now";
       }
-      
+
       const now = new Date();
       const diff = now.getTime() - date.getTime();
-      
-      if (diff < 60000) { // Less than 1 minute
-        return 'Just now';
-      } else if (diff < 3600000) { // Less than 1 hour
+
+      if (diff < 60000) {
+        // Less than 1 minute
+        return "Just now";
+      } else if (diff < 3600000) {
+        // Less than 1 hour
         const minutes = Math.floor(diff / 60000);
         return `${minutes}m ago`;
-      } else if (diff < 86400000) { // Less than 1 day
+      } else if (diff < 86400000) {
+        // Less than 1 day
         const hours = Math.floor(diff / 3600000);
         return `${hours}h ago`;
       } else {
         return date.toLocaleDateString();
       }
     } catch (error) {
-      console.error('Error formatting timestamp:', error);
-      return 'Now';
+      console.error("Error formatting timestamp:", error);
+      return "Now";
     }
   }
-
-
-
-
 
   /**
    * Get all chat sessions for management
    */
-  async getAllChatSessions(): Promise<{ [sessionId: string]: ChatSession } | null> {
+  async getAllChatSessions(): Promise<{
+    [sessionId: string]: ChatSession;
+  } | null> {
     try {
       const sessionsResult = await this.storageManager.getChatSessions();
-      
+
       if (sessionsResult.success && sessionsResult.data) {
         const sessions: { [sessionId: string]: ChatSession } = {};
-        
+
         // Convert stored sessions back to ChatSession objects
-        Object.entries(sessionsResult.data).forEach(([sessionId, sessionData]) => {
-          sessions[sessionId] = {
-            id: sessionId,
-            messages: sessionData.messages.map((msg: any) => ({
-              ...msg,
-              timestamp: new Date(msg.timestamp)
-            })),
-            createdAt: new Date(sessionData.createdAt),
-            updatedAt: new Date(sessionData.updatedAt)
-          };
-        });
-        
+        Object.entries(sessionsResult.data).forEach(
+          ([sessionId, sessionData]) => {
+            sessions[sessionId] = {
+              id: sessionId,
+              messages: sessionData.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp),
+              })),
+              createdAt: new Date(sessionData.createdAt),
+              updatedAt: new Date(sessionData.updatedAt),
+            };
+          }
+        );
+
         return sessions;
       }
-      
+
       return null;
     } catch (error) {
-      console.error('Error getting chat sessions:', error);
+      console.error("Error getting chat sessions:", error);
       return null;
     }
   }
@@ -719,30 +798,36 @@ export class ChatComponent {
   async loadChatSession(sessionId: string): Promise<boolean> {
     try {
       const sessionsResult = await this.storageManager.getChatSessions();
-      
-      if (sessionsResult.success && sessionsResult.data && sessionsResult.data[sessionId]) {
+
+      if (
+        sessionsResult.success &&
+        sessionsResult.data &&
+        sessionsResult.data[sessionId]
+      ) {
         const sessionData = sessionsResult.data[sessionId];
-        
+
         this.currentSession = {
           id: sessionId,
           messages: sessionData.messages.map((msg: any) => ({
             ...msg,
-            timestamp: new Date(msg.timestamp)
+            timestamp: new Date(msg.timestamp),
           })),
           createdAt: new Date(sessionData.createdAt),
-          updatedAt: new Date(sessionData.updatedAt)
+          updatedAt: new Date(sessionData.updatedAt),
         };
-        
+
         // Re-render the messages
         this.renderMessages();
-        
-        console.log(`Loaded chat session: ${sessionId} with ${this.currentSession.messages.length} messages`);
+
+        console.log(
+          `Loaded chat session: ${sessionId} with ${this.currentSession.messages.length} messages`
+        );
         return true;
       }
-      
+
       return false;
     } catch (error) {
-      console.error('Error loading chat session:', error);
+      console.error("Error loading chat session:", error);
       return false;
     }
   }
@@ -751,20 +836,14 @@ export class ChatComponent {
    * Update the message count display
    */
   private updateMessageCount(): void {
-    const messageCountElement = document.querySelector('#message-count') as HTMLElement;
+    const messageCountElement = document.querySelector(
+      "#message-count"
+    ) as HTMLElement;
     if (messageCountElement && this.currentSession) {
       const count = this.currentSession.messages.length;
-      messageCountElement.textContent = `${count} message${count !== 1 ? 's' : ''}`;
+      messageCountElement.textContent = `${count} message${
+        count !== 1 ? "s" : ""
+      }`;
     }
   }
-
-
-
-
-
-
-
-
-
-
 }

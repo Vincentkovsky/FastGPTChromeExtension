@@ -171,7 +171,10 @@ export class ConfigurationComponent {
     this.setLoadingState(true);
 
     try {
-      // Save configuration
+      // Update form data from current input values
+      this.updateFormDataFromInputs();
+
+      // Save configuration using state manager
       const result = await this.stateManager.completeConfiguration(this.formData as FastGPTConfig);
       
       if (result.success) {
@@ -188,9 +191,30 @@ export class ConfigurationComponent {
       }
     } catch (error) {
       this.showErrorMessage('An unexpected error occurred while saving configuration');
-      console.error('Configuration save error:', error);
     } finally {
       this.setLoadingState(false);
+    }
+  }
+
+
+  /**
+   * Update form data from current input values
+   */
+  private updateFormDataFromInputs(): void {
+    if (!this.container) return;
+    
+    const baseUrlInput = this.container.querySelector('#baseUrl') as HTMLInputElement;
+    const appIdInput = this.container.querySelector('#appId') as HTMLInputElement;
+    const apiKeyInput = this.container.querySelector('#apiKey') as HTMLInputElement;
+    
+    if (baseUrlInput) {
+      this.formData.baseUrl = baseUrlInput.value.trim();
+    }
+    if (appIdInput) {
+      this.formData.appId = appIdInput.value.trim();
+    }
+    if (apiKeyInput) {
+      this.formData.apiKey = apiKeyInput.value.trim();
     }
   }
 
@@ -215,22 +239,9 @@ export class ConfigurationComponent {
         // Show user-friendly error message
         const userMessage = this.getUserFriendlyErrorMessage(result.error || 'Connection test failed');
         this.showErrorMessage(userMessage);
-        
-        // Log detailed error for debugging
-        console.error('Connection test failed:', {
-          error: result.error,
-          details: result.details,
-          config: {
-            baseUrl: config.baseUrl,
-            appId: config.appId,
-            // Don't log the API key for security
-            hasApiKey: !!config.apiKey
-          }
-        });
       }
     } catch (error) {
       this.showErrorMessage('An unexpected error occurred during connection test. Please try again.');
-      console.error('Connection test error:', error);
     } finally {
       this.setTestingState(false);
     }
